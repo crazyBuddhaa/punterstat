@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — Earn Your Grade. Own Your Edge.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --blue-light: #4B3FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --gold-dim: #C9A84C;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-20: rgba(255,255,255,0.12);
+      --bronze: #CD7F32;
+      --silver: #C0C0C0;
+      --diamond: #7DF9FF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--blue);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 5%;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      background: rgba(43, 31, 232, 0.6);
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-cta {
+      background: var(--white);
+      color: var(--blue);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.55rem 1.3rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 5% 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(100,80,255,0.35) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--white-20);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      max-width: 820px;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero h1 em {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      color: var(--white-60);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-top: 1.5rem;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--blue);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.85rem 2rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.85rem 2rem;
+      border-radius: 100px;
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--white);
+      background: var(--white-20);
+    }
+
+    /* LIVE TICKER */
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      margin-top: 4rem;
+      border-top: 1px solid var(--white-20);
+      border-bottom: 1px solid var(--white-20);
+      padding: 0.8rem 0;
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+
+    .ticker {
+      display: flex;
+      gap: 3rem;
+      animation: ticker 28s linear infinite;
+      white-space: nowrap;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--white-60);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ticker-item .badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      font-weight: 700;
+    }
+
+    .badge-won { background: rgba(74,222,128,0.2); color: #4ade80; }
+    .badge-lost { background: rgba(248,113,113,0.2); color: #f87171; }
+    .badge-pending { background: rgba(255,209,102,0.2); color: var(--gold); }
+
+    /* PROOF STRIP */
+    .proof-strip {
+      display: flex;
+      justify-content: center;
+      gap: clamp(2rem, 6vw, 5rem);
+      padding: 3rem 5%;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s 0.5s ease both;
+    }
+
+    .proof-item {
+      text-align: center;
+    }
+
+    .proof-number {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--white);
+      letter-spacing: -1px;
+    }
+
+    .proof-number span { color: var(--gold); }
+
+    .proof-label {
+      font-size: 0.8rem;
+      color: var(--white-60);
+      margin-top: 0.2rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* SECTION BASE */
+    section {
+      padding: 6rem 5%;
+      position: relative;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      letter-spacing: -1px;
+      line-height: 1.1;
+      max-width: 600px;
+    }
+
+    .section-title em {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* THE PROBLEM */
+    .problem {
+      background: var(--navy);
+      border-radius: 2rem;
+      margin: 0 2%;
+      overflow: hidden;
+    }
+
+    .problem-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    .problem-left {
+      padding: 4rem;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .problem-right {
+      padding: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .problem-quote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      line-height: 1.4;
+      color: var(--white);
+      margin-top: 1.5rem;
+    }
+
+    .fake-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1rem;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .fake-card .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #444, #222);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .fake-card .info { flex: 1; }
+    .fake-card .name { font-weight: 700; font-size: 0.9rem; }
+    .fake-card .claim { font-size: 0.8rem; color: var(--white-60); margin-top: 0.15rem; }
+
+    .fake-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      background: rgba(248,113,113,0.15);
+      color: #f87171;
+      letter-spacing: 0.05em;
+    }
+
+    .unverified-stamp {
+      position: absolute;
+      top: 50%; right: 1.2rem;
+      transform: translateY(-50%) rotate(-8deg);
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      border: 2px solid #f87171;
+      color: #f87171;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+    /* HOW IT WORKS */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .how-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 1.5rem;
+      padding: 2rem 1.8rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .how-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .how-card::before {
+      content: attr(data-step);
+      position: absolute;
+      top: -0.5rem; right: 1.2rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 5rem;
+      color: rgba(255,255,255,0.04);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .how-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .how-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .how-card p {
+      font-size: 0.88rem;
+      color: var(--white-60);
+      line-height: 1.65;
+    }
+
+    .how-card .lock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(255,209,102,0.12);
+      border: 1px solid rgba(255,209,102,0.25);
+      color: var(--gold);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      margin-top: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* PUNTER SCORE */
+    .grades {
+      background: var(--navy);
+      border-radius: 2rem;
+      margin: 0 2%;
+    }
+
+    .grades-inner {
+      padding: 4rem;
+    }
+
+    .grades-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .grades-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .grade-card {
+      border-radius: 1.3rem;
+      padding: 1.8rem;
+      border: 1.5px solid rgba(255,255,255,0.08);
+      background: var(--navy-card2);
+      transition: transform 0.25s;
+      cursor: default;
+    }
+
+    .grade-card:hover { transform: translateY(-3px); }
+
+    .grade-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .grade-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .grade-range {
+      font-size: 0.78rem;
+      font-weight: 600;
+      opacity: 0.55;
+      margin-bottom: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    .grade-perk {
+      font-size: 0.82rem;
+      color: var(--white-60);
+      line-height: 1.6;
+    }
+
+    .grade-bar {
+      height: 4px;
+      border-radius: 100px;
+      margin-top: 1.2rem;
+      opacity: 0.5;
+    }
+
+    .bronze .grade-name { color: var(--bronze); }
+    .bronze .grade-bar { background: var(--bronze); }
+    .silver .grade-name { color: var(--silver); }
+    .silver .grade-bar { background: var(--silver); }
+    .gold .grade-name { color: var(--gold); }
+    .gold .grade-bar { background: var(--gold); }
+    .gold { border-color: rgba(255,209,102,0.3); }
+    .diamond .grade-name { color: var(--diamond); }
+    .diamond .grade-bar { background: var(--diamond); }
+    .diamond { border-color: rgba(125,249,255,0.2); }
+
+    .metrics-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .metric-pill {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .metric-pill .w { color: var(--gold); font-weight: 700; }
+
+    /* LEADERBOARD */
+    .leaderboard-wrap {
+      max-width: 680px;
+      margin: 3rem auto 0;
+    }
+
+    .lb-header {
+      background: var(--navy-card);
+      border: 1px solid rgba(255,209,102,0.3);
+      border-radius: 1rem 1rem 0 0;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .lb-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .lb-live {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #4ade80;
+      letter-spacing: 0.05em;
+    }
+
+    .lb-dot {
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .lb-row {
+      background: var(--navy-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-top: none;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      transition: background 0.2s;
+      overflow: hidden;
+    }
+
+    .lb-row:last-child { border-radius: 0 0 1rem 1rem; }
+    .lb-row:hover { background: var(--navy-card2); }
+
+    .lb-rank {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--gold);
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .lb-rank.dim { color: var(--white-60); font-size: 0.95rem; }
+
+    .lb-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .lb-info { flex: 1; min-width: 0; overflow: hidden; }
+    .lb-name { font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-meta { font-size: 0.72rem; color: var(--white-60); margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .lb-grade {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.2rem 0.5rem;
+      border-radius: 100px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .lb-stat {
+      text-align: right;
+      flex-shrink: 0;
+      min-width: 52px;
+    }
+
+    .lb-stat-val {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    .lb-stat-label { font-size: 0.65rem; color: var(--white-60); margin-top: 0.1rem; }
+
+    .grade-diamond-badge {
+      background: rgba(125,249,255,0.12);
+      color: var(--diamond);
+      border: 1px solid rgba(125,249,255,0.3);
+    }
+
+    .grade-gold-badge {
+      background: rgba(255,209,102,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(255,209,102,0.3);
+    }
+
+    .grade-silver-badge {
+      background: rgba(192,192,192,0.12);
+      color: var(--silver);
+      border: 1px solid rgba(192,192,192,0.25);
+    }
+
+    /* WAITLIST */
+    .waitlist {
+      text-align: center;
+      padding: 7rem 5%;
+    }
+
+    .waitlist-card {
+      background: var(--navy);
+      border-radius: 2rem;
+      padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 6vw, 5rem);
+      max-width: 620px;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .waitlist-card::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(61,47,255,0.4) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .waitlist-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .waitlist-card p {
+      color: var(--white-60);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .waitlist-form {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .waitlist-input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 100px;
+      padding: 0.85rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .waitlist-input::placeholder { color: rgba(255,255,255,0.35); }
+    .waitlist-input:focus { border-color: rgba(255,255,255,0.5); }
+
+    .waitlist-btn {
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.85rem 1.8rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .waitlist-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,209,102,0.3);
+    }
+
+    .waitlist-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 1rem;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--white-20);
+      padding: 2rem 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-text {
+      font-size: 0.8rem;
+      color: var(--white-60);
+    }
+
+    .footer-osn {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.25);
+      font-style: italic;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .problem-inner { grid-template-columns: 1fr; }
+      .problem-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 2.5rem 2rem; }
+      .problem-right { padding: 2.5rem 2rem; }
+      .grades-inner { padding: 2.5rem 1.5rem; }
+      .grades-header { flex-direction: column; align-items: flex-start; }
+      nav { padding: 1.2rem 4%; }
+      .hero { padding-top: 6rem; }
+      .problem, .grades { margin: 0; border-radius: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="assets/logo.png" class="logo-mark" alt="PunterStat." />
+      <span class="logo-text">PunterStat.</span>
+    </a>
+    <a href="#waitlist" class="nav-cta">Get Early Access</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Now in early access — join the waitlist
+    </div>
+
+    <h1>Your tips. <em>Verified.</em><br/>Your grade. Earned.</h1>
+
+    <p class="hero-sub">
+      PunterStat. locks your predictions before kickoff, settles them automatically from live data, and builds you a public track record nobody can fake.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#waitlist" class="btn-primary">Claim Your Spot →</a>
+      <a href="#how" class="btn-ghost">See How It Works</a>
+    </div>
+
+    <!-- LIVE TICKER -->
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <!-- Repeated for seamless loop -->
+        <div class="ticker-item">⚽ Man City vs Arsenal &nbsp;<span class="badge badge-won">WON</span>&nbsp; +2.4 units</div>
+        <div class="ticker-item">🏀 Lakers vs Celtics &nbsp;<span class="badge badge-lost">LOST</span>&nbsp; -1 unit</div>
+        <div class="ticker-item">⚽ Barcelona vs Real Madrid &nbsp;<span class="badge badge-pending">PENDING</span></div>
+        <div class="ticker-item">🎾 Djokovic to win set 1 &nbsp;<span class="badge badge-won">WON</span>&nbsp; +1.8 units</div>
+        <div class="ticker-item">⚽ PSG vs Bayern &nbsp;<span class="badge badge-won">WON</span>&nbsp; +3.1 units</div>
+        <div class="ticker-item">🏈 Chiefs -3.5 &nbsp;<span class="badge badge-lost">LOST</span>&nbsp; -1 unit</div>
+        <div class="ticker-item">⚽ Man City vs Arsenal &nbsp;<span class="badge badge-won">WON</span>&nbsp; +2.4 units</div>
+        <div class="ticker-item">🏀 Lakers vs Celtics &nbsp;<span class="badge badge-lost">LOST</span>&nbsp; -1 unit</div>
+        <div class="ticker-item">⚽ Barcelona vs Real Madrid &nbsp;<span class="badge badge-pending">PENDING</span></div>
+        <div class="ticker-item">🎾 Djokovic to win set 1 &nbsp;<span class="badge badge-won">WON</span>&nbsp; +1.8 units</div>
+        <div class="ticker-item">⚽ PSG vs Bayern &nbsp;<span class="badge badge-won">WON</span>&nbsp; +3.1 units</div>
+        <div class="ticker-item">🏈 Chiefs -3.5 &nbsp;<span class="badge badge-lost">LOST</span>&nbsp; -1 unit</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF STRIP -->
+  <div class="proof-strip reveal">
+    <div class="proof-item">
+      <div class="proof-number">12<span>K+</span></div>
+      <div class="proof-label">Tips Tracked</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-number">98<span>%</span></div>
+      <div class="proof-label">Auto-Settled</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-number">0</div>
+      <div class="proof-label">Edited After Kickoff</div>
+    </div>
+    <div class="proof-item">
+      <div class="proof-number">4<span> grades</span></div>
+      <div class="proof-label">Earned, Not Claimed</div>
+    </div>
+  </div>
+
+  <!-- THE PROBLEM -->
+  <section style="padding: 2rem 3%;">
+    <div class="problem reveal">
+      <div class="problem-inner">
+        <div class="problem-left">
+          <span class="section-label">The Problem</span>
+          <p class="problem-quote">"Anyone can screenshot a winning bet.<br/>Nobody can verify a track record."</p>
+          <p style="color: var(--white-60); font-size:0.9rem; line-height:1.7; margin-top:1.5rem;">
+            The entire tipster industry runs on unverifiable claims and social media hype. 
+            Followers are built on screenshots, not performance. PunterStat. changes that.
+          </p>
+        </div>
+        <div class="problem-right">
+          <div class="fake-card">
+            <div class="avatar">🤷</div>
+            <div class="info">
+              <div class="name">@TipKing99</div>
+              <div class="claim">10/10 last week 🔥 DM for picks</div>
+            </div>
+            <div class="unverified-stamp">UNVERIFIED</div>
+          </div>
+          <div class="fake-card">
+            <div class="avatar">📸</div>
+            <div class="info">
+              <div class="name">@BetGuru</div>
+              <div class="claim">Screenshot from 3 months ago</div>
+            </div>
+            <div class="unverified-stamp">UNVERIFIED</div>
+          </div>
+          <div class="fake-card">
+            <div class="avatar">💬</div>
+            <div class="info">
+              <div class="name">@ProPunter</div>
+              <div class="claim">"Trust me bro — 87% win rate"</div>
+            </div>
+            <div class="unverified-stamp">UNVERIFIED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <span class="section-label reveal">How It Works</span>
+    <h2 class="section-title reveal">Four steps.<br/><em>Zero</em> room for cheating.</h2>
+    <div class="how-grid">
+      <div class="how-card reveal" data-step="1">
+        <div class="how-icon">📝</div>
+        <h3>Submit Before Kickoff</h3>
+        <p>Enter your tip — match, selection, and odds — before the game starts. That's the only window you get.</p>
+        <span class="lock-badge">⏱ Pre-match only</span>
+      </div>
+      <div class="how-card reveal" data-step="2">
+        <div class="how-icon">🔒</div>
+        <h3>It's Locked Instantly</h3>
+        <p>The moment kickoff arrives, your tip is sealed. No edits. No deletions. The record is permanent.</p>
+        <span class="lock-badge">🔒 Tamper-proof</span>
+      </div>
+      <div class="how-card reveal" data-step="3">
+        <div class="how-icon">📡</div>
+        <h3>Auto-Settled by Live Data</h3>
+        <p>Results come from a live sports feed — not from you. Won, Lost, or Void. No human touches the outcome.</p>
+        <span class="lock-badge">⚡ Live API feed</span>
+      </div>
+      <div class="how-card reveal" data-step="4">
+        <div class="how-icon">🏆</div>
+        <h3>Your PunterScore Builds</h3>
+        <p>Every settled tip feeds your grade — calculated on ROI, win rate, consistency, and odds calibration.</p>
+        <span class="lock-badge">📈 Always updating</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUNTER SCORE GRADES -->
+  <section style="padding: 2rem 3%;">
+    <div class="grades reveal">
+      <div class="grades-inner">
+        <div class="grades-header">
+          <div>
+            <span class="section-label">PunterScore™</span>
+            <h2 class="section-title">A grade you <em>earn</em>,<br/>not one you claim.</h2>
+          </div>
+          <p style="color:var(--white-60); font-size:0.88rem; max-width:280px; line-height:1.7;">
+            Minimum 20 settled tips required. Calculated automatically. Updated in real time.
+          </p>
+        </div>
+
+        <div class="grades-grid">
+          <div class="grade-card bronze">
+            <div class="grade-icon">🥉</div>
+            <div class="grade-name">Bronze</div>
+            <div class="grade-range">Score 0 – 39</div>
+            <div class="grade-perk">You're building your record. Every tip counts toward your rise.</div>
+            <div class="grade-bar"></div>
+          </div>
+          <div class="grade-card silver">
+            <div class="grade-icon">🥈</div>
+            <div class="grade-name">Silver</div>
+            <div class="grade-range">Score 40 – 59</div>
+            <div class="grade-perk">Consistent. Your history is starting to speak louder than your claims.</div>
+            <div class="grade-bar"></div>
+          </div>
+          <div class="grade-card gold">
+            <div class="grade-icon">🥇</div>
+            <div class="grade-name">Gold</div>
+            <div class="grade-range">Score 60 – 79</div>
+            <div class="grade-perk">You've earned subscriber feeds and revenue share. Your edge is real.</div>
+            <div class="grade-bar"></div>
+          </div>
+          <div class="grade-card diamond">
+            <div class="grade-icon">💎</div>
+            <div class="grade-name">Diamond</div>
+            <div class="grade-range">Score 80 – 100</div>
+            <div class="grade-perk">Elite. Sponsored visibility, top leaderboard placement, and verified authority.</div>
+            <div class="grade-bar"></div>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-pill"><span class="w">40%</span> ROI</div>
+          <div class="metric-pill"><span class="w">25%</span> Win Rate</div>
+          <div class="metric-pill"><span class="w">20%</span> Odds Calibration</div>
+          <div class="metric-pill"><span class="w">15%</span> Consistency</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD PREVIEW -->
+  <section>
+    <div style="text-align:center;" class="reveal">
+      <span class="section-label">Leaderboard</span>
+      <h2 class="section-title" style="margin:0 auto; text-align:center;">The best punters,<br/><em>ranked by proof.</em></h2>
+    </div>
+
+    <div class="leaderboard-wrap reveal">
+      <div class="lb-header">
+        <span class="lb-title">Top Punters This Week</span>
+        <span class="lb-live"><span class="lb-dot"></span> Live</span>
+      </div>
+
+      <div class="lb-row">
+        <span class="lb-rank">1</span>
+        <div class="lb-avatar" style="background:linear-gradient(135deg,#3D2FFF,#7DF9FF)">⚡</div>
+        <div class="lb-info">
+          <div class="lb-name">@SharpEdge</div>
+          <div class="lb-meta">147 tips · Football specialist</div>
+        </div>
+        <span class="lb-grade grade-diamond-badge">💎 Diamond</span>
+        <div class="lb-stat">
+          <div class="lb-stat-val" style="color:#4ade80">+31.2%</div>
+          <div class="lb-stat-label">ROI</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <span class="lb-rank">2</span>
+        <div class="lb-avatar" style="background:linear-gradient(135deg,#FFD166,#f59e0b)">🎯</div>
+        <div class="lb-info">
+          <div class="lb-name">@CallItRight</div>
+          <div class="lb-meta">89 tips · Multi-sport</div>
+        </div>
+        <span class="lb-grade grade-gold-badge">🥇 Gold</span>
+        <div class="lb-stat">
+          <div class="lb-stat-val" style="color:#4ade80">+18.7%</div>
+          <div class="lb-stat-label">ROI</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <span class="lb-rank dim">3</span>
+        <div class="lb-avatar" style="background:linear-gradient(135deg,#C0C0C0,#888)">📊</div>
+        <div class="lb-info">
+          <div class="lb-name">@ValueOnly</div>
+          <div class="lb-meta">212 tips · Tennis & basketball</div>
+        </div>
+        <span class="lb-grade grade-gold-badge">🥇 Gold</span>
+        <div class="lb-stat">
+          <div class="lb-stat-val" style="color:#4ade80">+14.1%</div>
+          <div class="lb-stat-label">ROI</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <span class="lb-rank dim">4</span>
+        <div class="lb-avatar" style="background:linear-gradient(135deg,#555,#333)">🧠</div>
+        <div class="lb-info">
+          <div class="lb-name">@OddsScout</div>
+          <div class="lb-meta">64 tips · Football only</div>
+        </div>
+        <span class="lb-grade grade-silver-badge">🥈 Silver</span>
+        <div class="lb-stat">
+          <div class="lb-stat-val" style="color:#4ade80">+9.4%</div>
+          <div class="lb-stat-label">ROI</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <span class="lb-rank dim">5</span>
+        <div class="lb-avatar" style="background:linear-gradient(135deg,#444,#222)">🔍</div>
+        <div class="lb-info">
+          <div class="lb-name">@UnderDogPro</div>
+          <div class="lb-meta">38 tips · Underdog specialist</div>
+        </div>
+        <span class="lb-grade grade-silver-badge">🥈 Silver</span>
+        <div class="lb-stat">
+          <div class="lb-stat-val" style="color:#4ade80">+7.8%</div>
+          <div class="lb-stat-label">ROI</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section class="waitlist" id="waitlist">
+    <div class="waitlist-card reveal">
+      <h2>Be first to own<br/>your edge.</h2>
+      <p>PunterStat. is launching soon. Join the waitlist and get early access before anyone else — plus a head start on building your verified record.</p>
+      <div class="waitlist-form">
+        <input class="waitlist-input" type="email" placeholder="Enter your email address" />
+        <button class="waitlist-btn">Get Early Access</button>
+      </div>
+      <p class="waitlist-note">No spam. No hype. Just your spot in line.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/logo.png" width="28" height="28" alt="PunterStat." style="object-fit:contain;" />
+      <span class="footer-text" style="font-weight:700; color:white;">PunterStat.</span>
+    </div>
+    <span class="footer-text">© 2026 PunterStat. All rights reserved.</span>
+    <span class="footer-osn">a theosnnetwork. product</span>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Waitlist form
+    const btn = document.querySelector('.waitlist-btn');
+    const input = document.querySelector('.waitlist-input');
+    btn.addEventListener('click', () => {
+      if (input.value && input.value.includes('@')) {
+        btn.textContent = '✓ You\'re on the list!';
+        btn.style.background = '#4ade80';
+        btn.style.color = '#0B1340';
+        input.value = '';
+        input.placeholder = 'We\'ll be in touch soon';
+      } else {
+        input.style.borderColor = '#f87171';
+        input.placeholder = 'Please enter a valid email';
+        setTimeout(() => { input.style.borderColor = ''; }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>
