@@ -556,6 +556,18 @@
         </div>
       </div>
 
+      <!-- CONFIRM EMAIL SCREEN -->
+      <div class="success-screen" id="confirmScreen">
+        <div class="success-icon">📧</div>
+        <h2>Check your inbox.</h2>
+        <p>We sent a confirmation link to<br/><strong id="confirmEmail" style="color:var(--gold);"></strong></p>
+        <p style="margin-top:0.8rem; font-size:0.82rem; color:var(--white-60); line-height:1.6;">Click the link in the email to activate your account. Once confirmed you can log in.</p>
+        <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.7rem;">
+          <button class="btn-dashboard" style="background:var(--gold);color:var(--navy);border:none;cursor:pointer;" onclick="switchTab('login')">Go to Log In →</button>
+          <p style="font-size:0.75rem; color:rgba(255,255,255,0.3);">Didn't get it? Check your spam folder.</p>
+        </div>
+      </div>
+
       <!-- FORM AREA -->
       <div id="formArea">
 
@@ -823,16 +835,18 @@
           throw new Error(profileData?.message || 'Profile creation failed.');
         }
 
-        // 3. Save session
-        localStorage.setItem('ps_user', JSON.stringify({
-          id: userId,
+        // 3. Save partial session (no access token yet — awaiting confirmation)
+        localStorage.setItem('ps_pending', JSON.stringify({
           username,
-          email,
-          access_token: authData.access_token
+          email
         }));
 
         btn.classList.remove('loading');
-        window.location.href = 'dashboard.html';
+
+        // Show confirmation screen
+        document.getElementById('formArea').style.display = 'none';
+        document.getElementById('confirmScreen').classList.add('show');
+        document.getElementById('confirmEmail').textContent = email;
 
       } catch (err) {
         btn.classList.remove('loading');
