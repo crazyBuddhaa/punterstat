@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --blue-light: #4B3FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --navy-card3: #0F1A3A;
+      --gold: #FFD166;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --success: #4ade80;
+      --error: #f87171;
+      --sidebar-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy-card);
+      border-right: 1px solid var(--white-20);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1.6rem 1.4rem 1.2rem;
+      text-decoration: none;
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    .sidebar-logo img {
+      width: 30px; height: 30px;
+      object-fit: contain;
+    }
+
+    .sidebar-logo span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--white);
+      letter-spacing: -0.4px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1.2rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.8rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--white-60);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-align: left;
+      width: 100%;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: var(--white-10); color: var(--white); }
+
+    .nav-item.active {
+      background: var(--blue-bright);
+      color: var(--white);
+    }
+
+    .nav-icon { font-size: 1rem; flex-shrink: 0; }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--white-20);
+      margin: 0.6rem 0.9rem;
+    }
+
+    .sidebar-user {
+      padding: 1rem 1.2rem;
+      border-top: 1px solid var(--white-20);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-bright), #7DF9FF);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-weight: 700; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-grade { font-size: 0.7rem; color: var(--gold); font-weight: 600; margin-top: 0.1rem; }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid var(--white-20);
+      background: var(--navy-card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.4px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .btn-submit-tip {
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-submit-tip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255,209,102,0.3);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 0.3rem;
+    }
+
+    /* ── CONTENT AREA ── */
+    .content {
+      padding: 2rem;
+      flex: 1;
+    }
+
+    /* SECTIONS */
+    .section { display: none; }
+    .section.active { display: block; animation: fadeUp 0.35s ease both; }
+
+    /* ── OVERVIEW SECTION ── */
+
+    /* SCORE HERO */
+    .score-hero {
+      background: linear-gradient(135deg, var(--blue-bright) 0%, #1a0fd4 100%);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      flex-wrap: wrap;
+    }
+
+    .score-hero::before {
+      content: '';
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .score-hero::after {
+      content: '';
+      position: absolute;
+      right: 40px; bottom: -80px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .score-left { position: relative; z-index: 2; }
+
+    .score-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.4rem;
+    }
+
+    .score-number {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 4.5rem);
+      letter-spacing: -3px;
+      line-height: 1;
+    }
+
+    .score-sub {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 0.5rem;
+    }
+
+    .score-right {
+      position: relative;
+      z-index: 2;
+      text-align: right;
+    }
+
+    .grade-badge-large {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 0.5rem 1.2rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .grade-progress-wrap {
+      width: 160px;
+    }
+
+    .grade-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 0.4rem;
+    }
+
+    .grade-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .grade-progress-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 100px;
+      width: 23%;
+      transition: width 1s ease;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.2rem;
+      padding: 1.3rem 1.2rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+    .stat-icon { font-size: 1.3rem; margin-bottom: 0.6rem; }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .stat-value.positive { color: var(--success); }
+    .stat-value.negative { color: var(--error); }
+    .stat-value.gold { color: var(--gold); }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--white-60);
+      margin-top: 0.3rem;
+      font-weight: 500;
+    }
+
+    .stat-delta {
+      font-size: 0.7rem;
+      margin-top: 0.4rem;
+      font-weight: 600;
+    }
+
+    .stat-delta.up { color: var(--success); }
+    .stat-delta.down { color: var(--error); }
+
+    /* ── TIPS HISTORY ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .section-heading {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.3px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--white-10);
+      border: 1px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--white-60);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--blue-bright);
+      color: var(--white);
+      border-color: transparent;
+    }
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .tip-row {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color 0.2s;
+      flex-wrap: wrap;
+    }
+
+    .tip-row:hover { border-color: rgba(255,255,255,0.2); }
+
+    .tip-sport {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .tip-info { flex: 1; min-width: 120px; }
+
+    .tip-match {
+      font-weight: 700;
+      font-size: 0.88rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tip-selection {
+      font-size: 0.78rem;
+      color: var(--white-60);
+      margin-top: 0.15rem;
+    }
+
+    .tip-odds {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      color: var(--white-60);
+    }
+
+    .tip-date {
+      font-size: 0.72rem;
+      color: var(--white-30);
+      flex-shrink: 0;
+    }
+
+    .tip-status {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-won { background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.25); }
+    .status-lost { background: rgba(248,113,113,0.12); color: var(--error); border: 1px solid rgba(248,113,113,0.25); }
+    .status-pending { background: rgba(255,209,102,0.12); color: var(--gold); border: 1px solid rgba(255,209,102,0.25); }
+    .status-void { background: rgba(255,255,255,0.07); color: var(--white-60); border: 1px solid var(--white-20); }
+
+    .tip-units {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .units-pos { color: var(--success); }
+    .units-neg { color: var(--error); }
+    .units-neutral { color: var(--white-60); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--white-60);
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--white); margin-bottom: 0.4rem; }
+    .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+    /* ── SUBMIT TIP SECTION ── */
+    .submit-card {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      max-width: 600px;
+    }
+
+    .submit-heading {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.4px;
+      margin-bottom: 0.4rem;
+    }
+
+    .submit-sub {
+      font-size: 0.85rem;
+      color: var(--white-60);
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white-60);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--white-10);
+      border: 1.5px solid var(--white-20);
+      border-radius: 0.8rem;
+      padding: 0.8rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input::placeholder { color: rgba(255,255,255,0.28); }
+    .form-input:focus, .form-select:focus {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .form-select option { background: var(--navy-card); color: var(--white); }
+
+    .lock-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: rgba(255,209,102,0.08);
+      border: 1px solid rgba(255,209,102,0.2);
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      margin: 1.2rem 0;
+    }
+
+    .lock-notice-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .lock-notice-text { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.55; }
+    .lock-notice-text strong { color: var(--gold); }
+
+    .btn-lock-tip {
+      width: 100%;
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.95rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-lock-tip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(255,209,102,0.3);
+    }
+
+    .btn-lock-tip.loading { color: transparent; pointer-events: none; }
+    .btn-lock-tip.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(11,19,64,0.3);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 0.7s linear infinite;
+    }
+
+    .tip-success {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .tip-success.show { display: block; }
+    .tip-success-icon { font-size: 3rem; margin-bottom: 0.8rem; }
+    .tip-success h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .tip-success p { font-size: 0.85rem; color: var(--white-60); line-height: 1.6; margin-bottom: 1.5rem; }
+
+    .btn-another {
+      background: var(--white-10);
+      border: 1px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.7rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-another:hover { background: var(--white-20); }
+
+    /* ── BET SLIP FORM ── */
+    .method-toggle {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .method-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 0.9rem;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 140px;
+    }
+
+    .method-btn.active {
+      background: var(--blue-bright);
+      border-color: var(--blue-bright);
+      color: var(--white);
+    }
+
+    .bet-type-row {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .bet-type-btn {
+      padding: 0.5rem 1.4rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--white-20);
+      background: transparent;
+      color: var(--white-60);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bet-type-btn.active {
+      background: var(--blue-bright);
+      border-color: var(--blue-bright);
+      color: var(--white);
+    }
+
+    .sport-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
+    }
+
+    .sport-chip {
+      padding: 0.4rem 0.9rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .sport-chip.active {
+      background: var(--blue-bright);
+      border-color: var(--blue-bright);
+      color: var(--white);
+    }
+
+    /* ACCUMULATOR LEGS */
+    .acca-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .btn-add-leg {
+      background: var(--white-10);
+      border: 1px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-add-leg:hover { background: var(--white-20); }
+
+    .leg-card {
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 0.7rem;
+      animation: fadeUp 0.25s ease both;
+    }
+
+    .leg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .leg-number {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .btn-remove-leg {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--error);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-remove-leg:hover { background: rgba(248,113,113,0.2); }
+
+    /* SLIP PREVIEW */
+    .slip-preview {
+      background: var(--navy-card2);
+      border: 1px solid rgba(255,209,102,0.2);
+      border-radius: 1rem;
+      padding: 1.2rem;
+      margin: 1rem 0;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .slip-preview-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+    }
+
+    .slip-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--white-10);
+      font-size: 0.82rem;
+    }
+
+    .slip-row:last-child { border-bottom: none; }
+    .slip-row-label { color: var(--white-60); }
+    .slip-row-val { font-weight: 700; }
+    .slip-row-val.gold { color: var(--gold); }
+    .slip-row-val.green { color: var(--success); }
+
+    /* IMPORT */
+    .btn-import {
+      width: 100%;
+      background: var(--blue-bright);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 0.85rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 0.3rem;
+    }
+
+    .btn-import:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(61,47,255,0.4);
+    }
+
+    .import-note {
+      font-size: 0.74rem;
+      color: var(--white-60);
+      margin-top: 0.7rem;
+      line-height: 1.5;
+    }
+
+    .locked-summary {
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      text-align: left;
+      color: var(--white-60);
+    }
+
+    .locked-summary strong { color: var(--white); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 8px 0 32px rgba(0,0,0,0.4);
+      }
+
+      .sidebar-overlay.open { display: block; }
+
+      .main { margin-left: 0; }
+
+      .mobile-menu-btn { display: block; }
+
+      .content { padding: 1.2rem; }
+
+      .form-row { grid-template-columns: 1fr; }
+
+      .score-hero { flex-direction: column; align-items: flex-start; }
+      .grade-progress-wrap { width: 100%; }
+
+      .topbar { padding: 1rem 1.2rem; }
+
+      .tip-row { gap: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('overview', this)">
+        <span class="nav-icon">📊</span> Overview
+      </button>
+      <button class="nav-item" onclick="showSection('tips', this)">
+        <span class="nav-icon">📋</span> My Tips
+      </button>
+      <button class="nav-item" onclick="showSection('submit', this)">
+        <span class="nav-icon">➕</span> Submit Tip
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <button class="nav-item" onclick="showSection('overview', this)" style="opacity:0.45; pointer-events:none;">
+        <span class="nav-icon">🏆</span> Leaderboard
+      </button>
+      <button class="nav-item" onclick="showSection('overview', this)" style="opacity:0.45; pointer-events:none;">
+        <span class="nav-icon">👤</span> Public Profile
+      </button>
+      <button class="nav-item" onclick="showSection('overview', this)" style="opacity:0.45; pointer-events:none;">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">PS</div>
+      <div class="user-info">
+        <div class="user-name">@SharpPunter</div>
+        <div class="user-grade">🥉 Bronze · 23 pts</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div style="display:flex; align-items:center; gap:0.8rem;">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+        <span class="topbar-title" id="topbarTitle">Overview</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-submit-tip" onclick="showSection('submit', null)">+ Submit Tip</button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="section active" id="section-overview">
+
+        <!-- PUNTER SCORE HERO -->
+        <div class="score-hero">
+          <div class="score-left">
+            <div class="score-label">Your PunterScore™</div>
+            <div class="score-number">23</div>
+            <div class="score-sub">Based on 8 settled tips · 12 more to unlock grade</div>
+          </div>
+          <div class="score-right">
+            <div class="grade-badge-large">🥉 Bronze</div>
+            <div class="grade-progress-wrap">
+              <div class="grade-progress-label">
+                <span>Bronze</span><span>Silver at 40</span>
+              </div>
+              <div class="grade-progress-bar">
+                <div class="grade-progress-fill" id="progressFill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATS GRID -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value positive">+8.4%</div>
+            <div class="stat-label">ROI (All time)</div>
+            <div class="stat-delta up">↑ +2.1% this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value gold">62.5%</div>
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-delta up">↑ 5/8 settled</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value gold">3</div>
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-delta up">↑ Wins in a row</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value positive">+4.2</div>
+            <div class="stat-label">Units Profit</div>
+            <div class="stat-delta up">↑ All time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Total Tips</div>
+            <div class="stat-delta" style="color:var(--white-60)">8 settled · 4 pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-value gold">1.87</div>
+            <div class="stat-label">Avg Odds</div>
+            <div class="stat-delta" style="color:var(--white-60)">Good value hunting</div>
+          </div>
+        </div>
+
+        <!-- RECENT TIPS PREVIEW -->
+        <div class="section-header">
+          <span class="section-heading">Recent Tips</span>
+          <button class="filter-btn active" onclick="showSection('tips', null)">View All →</button>
+        </div>
+
+        <div class="tips-list">
+          <div class="tip-row">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">Man City vs Arsenal</div>
+              <div class="tip-selection">Man City to win</div>
+            </div>
+            <span class="tip-odds">@1.75</span>
+            <span class="tip-date">Mar 22</span>
+            <span class="tip-status status-won">Won</span>
+            <span class="tip-units units-pos">+0.75u</span>
+          </div>
+          <div class="tip-row">
+            <span class="tip-sport">🏀</span>
+            <div class="tip-info">
+              <div class="tip-match">Lakers vs Celtics</div>
+              <div class="tip-selection">Celtics -4.5</div>
+            </div>
+            <span class="tip-odds">@1.90</span>
+            <span class="tip-date">Mar 21</span>
+            <span class="tip-status status-lost">Lost</span>
+            <span class="tip-units units-neg">-1u</span>
+          </div>
+          <div class="tip-row">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">Barcelona vs Real Madrid</div>
+              <div class="tip-selection">Both teams to score</div>
+            </div>
+            <span class="tip-odds">@1.65</span>
+            <span class="tip-date">Mar 23</span>
+            <span class="tip-status status-pending">Pending</span>
+            <span class="tip-units units-neutral">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MY TIPS ── -->
+      <div class="section" id="section-tips">
+        <div class="section-header">
+          <span class="section-heading">My Tips</span>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterTips('all', this)">All</button>
+            <button class="filter-btn" onclick="filterTips('won', this)">Won</button>
+            <button class="filter-btn" onclick="filterTips('lost', this)">Lost</button>
+            <button class="filter-btn" onclick="filterTips('pending', this)">Pending</button>
+          </div>
+        </div>
+
+        <div class="tips-list" id="allTipsList">
+          <div class="tip-row" data-status="won">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">Man City vs Arsenal</div>
+              <div class="tip-selection">Man City to win</div>
+            </div>
+            <span class="tip-odds">@1.75</span>
+            <span class="tip-date">Mar 22</span>
+            <span class="tip-status status-won">Won</span>
+            <span class="tip-units units-pos">+0.75u</span>
+          </div>
+          <div class="tip-row" data-status="won">
+            <span class="tip-sport">🎾</span>
+            <div class="tip-info">
+              <div class="tip-match">Djokovic vs Alcaraz</div>
+              <div class="tip-selection">Djokovic to win set 1</div>
+            </div>
+            <span class="tip-odds">@1.80</span>
+            <span class="tip-date">Mar 20</span>
+            <span class="tip-status status-won">Won</span>
+            <span class="tip-units units-pos">+0.80u</span>
+          </div>
+          <div class="tip-row" data-status="won">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">PSG vs Bayern Munich</div>
+              <div class="tip-selection">Over 2.5 goals</div>
+            </div>
+            <span class="tip-odds">@2.10</span>
+            <span class="tip-date">Mar 19</span>
+            <span class="tip-status status-won">Won</span>
+            <span class="tip-units units-pos">+1.10u</span>
+          </div>
+          <div class="tip-row" data-status="lost">
+            <span class="tip-sport">🏀</span>
+            <div class="tip-info">
+              <div class="tip-match">Lakers vs Celtics</div>
+              <div class="tip-selection">Celtics -4.5</div>
+            </div>
+            <span class="tip-odds">@1.90</span>
+            <span class="tip-date">Mar 21</span>
+            <span class="tip-status status-lost">Lost</span>
+            <span class="tip-units units-neg">-1u</span>
+          </div>
+          <div class="tip-row" data-status="lost">
+            <span class="tip-sport">🏈</span>
+            <div class="tip-info">
+              <div class="tip-match">Chiefs vs Ravens</div>
+              <div class="tip-selection">Chiefs -3.5</div>
+            </div>
+            <span class="tip-odds">@1.95</span>
+            <span class="tip-date">Mar 18</span>
+            <span class="tip-status status-lost">Lost</span>
+            <span class="tip-units units-neg">-1u</span>
+          </div>
+          <div class="tip-row" data-status="pending">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">Barcelona vs Real Madrid</div>
+              <div class="tip-selection">Both teams to score</div>
+            </div>
+            <span class="tip-odds">@1.65</span>
+            <span class="tip-date">Mar 23</span>
+            <span class="tip-status status-pending">Pending</span>
+            <span class="tip-units units-neutral">—</span>
+          </div>
+          <div class="tip-row" data-status="pending">
+            <span class="tip-sport">🎾</span>
+            <div class="tip-info">
+              <div class="tip-match">Sinner vs Medvedev</div>
+              <div class="tip-selection">Sinner to win</div>
+            </div>
+            <span class="tip-odds">@1.55</span>
+            <span class="tip-date">Mar 24</span>
+            <span class="tip-status status-pending">Pending</span>
+            <span class="tip-units units-neutral">—</span>
+          </div>
+          <div class="tip-row" data-status="void">
+            <span class="tip-sport">⚽</span>
+            <div class="tip-info">
+              <div class="tip-match">Liverpool vs Chelsea</div>
+              <div class="tip-selection">Liverpool to win</div>
+            </div>
+            <span class="tip-odds">@1.70</span>
+            <span class="tip-date">Mar 15</span>
+            <span class="tip-status status-void">Void</span>
+            <span class="tip-units units-neutral">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SUBMIT TIP ── -->
+      <div class="section" id="section-submit">
+
+        <!-- SUCCESS STATE -->
+        <div class="tip-success" id="tipSuccess">
+          <div class="tip-success-icon">🔒</div>
+          <h3>Bet Slip Locked In.</h3>
+          <p>Your tip has been submitted and locked before kickoff. It will be auto-settled by live data. No edits. No deletions. Your verified record is growing.</p>
+          <div class="locked-summary" id="lockedSummary"></div>
+          <button class="btn-another" onclick="resetSubmitForm()">Submit Another Tip</button>
+        </div>
+
+        <!-- FORM -->
+        <div id="submitForm">
+
+          <!-- IMPORT METHOD TOGGLE -->
+          <div class="method-toggle">
+            <button class="method-btn active" id="btnManual" onclick="switchMethod('manual')">✏️ Manual Entry</button>
+            <button class="method-btn" id="btnCode" onclick="switchMethod('code')">📋 Booking Code</button>
+          </div>
+
+          <!-- BOOKING CODE PANEL -->
+          <div class="submit-card" id="panelCode" style="display:none; margin-bottom:1rem;">
+            <div class="submit-heading" style="font-size:1rem; margin-bottom:0.3rem;">Import via Booking Code</div>
+            <p class="submit-sub" style="margin-bottom:1.2rem;">Paste your booking code from your bookmaker. We'll pull in the slip details automatically.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Bookmaker</label>
+                <select class="form-select" id="codeBookmaker">
+                  <option value="">Select bookmaker</option>
+                  <option>SportyBet</option>
+                  <option>Bet9ja</option>
+                  <option>Bet24</option>
+                  <option>Stake</option>
+                  <option>1xBet</option>
+                  <option>Betway</option>
+                  <option>BetKing</option>
+                  <option>NairaBet</option>
+                  <option>MerryBet</option>
+                  <option>football.com</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Booking Code</label>
+                <input class="form-input" type="text" id="bookingCode" placeholder="e.g. ABC12345" autocomplete="off" style="text-transform:uppercase;" />
+              </div>
+            </div>
+            <button class="btn-import" onclick="handleImportCode()">
+              <span id="importBtnText">Import Slip →</span>
+            </button>
+            <p class="import-note">⚠️ Booking code import is for reference only. You must still confirm and lock the details below.</p>
+          </div>
+
+          <!-- MANUAL / FULL FORM -->
+          <div class="submit-card" id="panelManual">
+
+            <!-- BET TYPE TOGGLE -->
+            <div style="margin-bottom:1.5rem;">
+              <label class="form-label" style="margin-bottom:0.6rem;">Bet Type</label>
+              <div class="bet-type-row">
+                <button class="bet-type-btn active" id="btnSingle" onclick="switchBetType('single')">Single</button>
+                <button class="bet-type-btn" id="btnAcca" onclick="switchBetType('acca')">Accumulator</button>
+              </div>
+            </div>
+
+            <!-- BOOKMAKER + BET ID -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Bookmaker</label>
+                <select class="form-select" id="tipBookmaker">
+                  <option value="">Select bookmaker</option>
+                  <option>SportyBet</option>
+                  <option>Bet9ja</option>
+                  <option>Bet24</option>
+                  <option>Stake</option>
+                  <option>1xBet</option>
+                  <option>Betway</option>
+                  <option>BetKing</option>
+                  <option>NairaBet</option>
+                  <option>MerryBet</option>
+                  <option>football.com</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bet ID / Reference</label>
+                <input class="form-input" type="text" id="tipBetId" placeholder="e.g. BET-00123456" autocomplete="off" />
+              </div>
+            </div>
+
+            <!-- SPORT TYPE -->
+            <div class="form-group">
+              <label class="form-label">Sport Type</label>
+              <div class="sport-grid" id="sportGrid">
+                <button class="sport-chip" data-sport="Football" onclick="selectSport(this)">⚽ Football</button>
+                <button class="sport-chip" data-sport="Basketball" onclick="selectSport(this)">🏀 Basketball</button>
+                <button class="sport-chip" data-sport="Tennis" onclick="selectSport(this)">🎾 Tennis</button>
+                <button class="sport-chip" data-sport="Am. Football" onclick="selectSport(this)">🏈 Am. Football</button>
+                <button class="sport-chip" data-sport="Cricket" onclick="selectSport(this)">🏏 Cricket</button>
+                <button class="sport-chip" data-sport="Ice Hockey" onclick="selectSport(this)">🏒 Ice Hockey</button>
+                <button class="sport-chip" data-sport="Boxing/MMA" onclick="selectSport(this)">🥊 Boxing/MMA</button>
+                <button class="sport-chip" data-sport="Mixed" onclick="selectSport(this)">🎲 Mixed</button>
+              </div>
+              <input type="hidden" id="tipSport" />
+            </div>
+
+            <!-- ACCUMULATOR LEGS -->
+            <div id="accaSection" style="display:none;">
+              <div class="acca-header">
+                <label class="form-label" style="margin:0;">Selections <span id="legCount" style="color:var(--gold);">(0)</span></label>
+                <button class="btn-add-leg" onclick="addLeg()">+ Add Selection</button>
+              </div>
+              <div id="legsList"></div>
+            </div>
+
+            <!-- SINGLE MATCH -->
+            <div id="singleSection">
+              <div class="form-group">
+                <label class="form-label">Match / Event</label>
+                <input class="form-input" type="text" id="tipMatch" placeholder="e.g. Man City vs Arsenal" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Your Selection</label>
+                <input class="form-input" type="text" id="tipSelection" placeholder="e.g. Man City to win / Over 2.5 goals" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Odds (Decimal)</label>
+                  <input class="form-input" type="number" id="tipOdds" placeholder="e.g. 1.85" step="0.01" min="1.01" oninput="calcWinnings()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Kickoff Date & Time</label>
+                  <input class="form-input" type="datetime-local" id="tipKickoff" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCUMULATOR SUMMARY FIELDS -->
+            <div id="accaSummarySection" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Total Odds</label>
+                  <input class="form-input" type="number" id="tipTotalOdds" placeholder="e.g. 12.50" step="0.01" min="1.01" oninput="calcWinnings()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">No. of Selections</label>
+                  <input class="form-input" type="number" id="tipLegsCount" placeholder="e.g. 5" min="2" readonly style="opacity:0.6;" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">First Kickoff</label>
+                  <input class="form-input" type="datetime-local" id="tipFirstKickoff" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Kickoff</label>
+                  <input class="form-input" type="datetime-local" id="tipLastKickoff" />
+                </div>
+              </div>
+            </div>
+
+            <!-- STAKE + POTENTIAL WIN -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Stake Amount (₦)</label>
+                <input class="form-input" type="number" id="tipStake" placeholder="e.g. 1000" min="1" oninput="calcWinnings()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Potential Winnings (₦)</label>
+                <input class="form-input" type="number" id="tipWinnings" placeholder="Auto-calculated" readonly style="opacity:0.6; background:rgba(255,209,102,0.05); border-color:rgba(255,209,102,0.2);" />
+              </div>
+            </div>
+
+            <!-- SLIP PREVIEW -->
+            <div class="slip-preview" id="slipPreview" style="display:none;">
+              <div class="slip-preview-title">📋 Bet Slip Preview</div>
+              <div id="slipPreviewContent"></div>
+            </div>
+
+            <!-- LOCK NOTICE -->
+            <div class="lock-notice">
+              <span class="lock-notice-icon">🔒</span>
+              <span class="lock-notice-text">
+                <strong>This tip will be locked immediately.</strong> Once submitted, you cannot edit or delete it. Results are settled automatically by live sports data — not by you. This is what makes your record verifiable.
+              </span>
+            </div>
+
+            <button class="btn-lock-tip" id="lockTipBtn" onclick="handleSubmitTip()">
+              🔒 Lock In My Tip
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── SECTION SWITCHER ──
+    const titles = { overview: 'Overview', tips: 'My Tips', submit: 'Submit Tip' };
+
+    function showSection(id, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('section-' + id).classList.add('active');
+      document.getElementById('topbarTitle').textContent = titles[id] || 'Dashboard';
+      if (btn) btn.classList.add('active');
+      closeSidebar();
+      if (id === 'overview') {
+        setTimeout(() => { document.getElementById('progressFill').style.width = '23%'; }, 300);
+      }
+    }
+
+    // ── MOBILE SIDEBAR ──
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+    }
+
+    // ── TIP FILTER ──
+    function filterTips(status, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#allTipsList .tip-row').forEach(row => {
+        row.style.display = (status === 'all' || row.dataset.status === status) ? 'flex' : 'none';
+      });
+    }
+
+    // ── METHOD TOGGLE ──
+    function switchMethod(method) {
+      const isCode = method === 'code';
+      document.getElementById('panelCode').style.display = isCode ? 'block' : 'none';
+      document.getElementById('panelManual').style.display = isCode ? 'none' : 'block';
+      document.getElementById('btnManual').classList.toggle('active', !isCode);
+      document.getElementById('btnCode').classList.toggle('active', isCode);
+    }
+
+    // ── BET TYPE TOGGLE ──
+    function switchBetType(type) {
+      const isAcca = type === 'acca';
+      document.getElementById('singleSection').style.display = isAcca ? 'none' : 'block';
+      document.getElementById('accaSection').style.display = isAcca ? 'block' : 'none';
+      document.getElementById('accaSummarySection').style.display = isAcca ? 'block' : 'none';
+      document.getElementById('btnSingle').classList.toggle('active', !isAcca);
+      document.getElementById('btnAcca').classList.toggle('active', isAcca);
+      updateSlipPreview();
+    }
+
+    // ── SPORT CHIP ──
+    function selectSport(chip) {
+      document.querySelectorAll('.sport-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      document.getElementById('tipSport').value = chip.dataset.sport;
+      updateSlipPreview();
+    }
+
+    // ── ACCUMULATOR LEGS ──
+    let legCount = 0;
+
+    function addLeg() {
+      legCount++;
+      const list = document.getElementById('legsList');
+      const div = document.createElement('div');
+      div.className = 'leg-card';
+      div.id = 'leg-' + legCount;
+      div.innerHTML = `
+        <div class="leg-header">
+          <span class="leg-number">Selection ${legCount}</span>
+          <button class="btn-remove-leg" onclick="removeLeg(${legCount})">✕ Remove</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Match / Event</label>
+            <input class="form-input leg-match" type="text" placeholder="e.g. Man City vs Arsenal" oninput="updateSlipPreview()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Selection</label>
+            <input class="form-input leg-sel" type="text" placeholder="e.g. Man City to win" oninput="updateSlipPreview()" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Odds</label>
+            <input class="form-input leg-odds" type="number" placeholder="e.g. 1.75" step="0.01" min="1.01" oninput="calcAccaOdds(); updateSlipPreview();" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kickoff</label>
+            <input class="form-input leg-kickoff" type="datetime-local" oninput="updateSlipPreview()" />
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+      updateLegCount();
+    }
+
+    function removeLeg(id) {
+      const el = document.getElementById('leg-' + id);
+      if (el) el.remove();
+      updateLegCount();
+      calcAccaOdds();
+      updateSlipPreview();
+    }
+
+    function updateLegCount() {
+      const legs = document.querySelectorAll('.leg-card');
+      document.getElementById('legCount').textContent = '(' + legs.length + ')';
+      document.getElementById('tipLegsCount').value = legs.length;
+    }
+
+    function calcAccaOdds() {
+      const oddsInputs = document.querySelectorAll('.leg-odds');
+      let total = 1;
+      let valid = true;
+      oddsInputs.forEach(inp => {
+        const v = parseFloat(inp.value);
+        if (!v || v < 1.01) { valid = false; return; }
+        total *= v;
+      });
+      if (valid && oddsInputs.length > 0) {
+        document.getElementById('tipTotalOdds').value = total.toFixed(2);
+        calcWinnings();
+      }
+    }
+
+    // ── WINNINGS CALCULATOR ──
+    function calcWinnings() {
+      const isAcca = document.getElementById('btnAcca').classList.contains('active');
+      const oddsEl = isAcca ? document.getElementById('tipTotalOdds') : document.getElementById('tipOdds');
+      const stakeEl = document.getElementById('tipStake');
+      const odds = parseFloat(oddsEl?.value);
+      const stake = parseFloat(stakeEl?.value);
+      if (odds >= 1.01 && stake > 0) {
+        document.getElementById('tipWinnings').value = (odds * stake).toFixed(2);
+      } else {
+        document.getElementById('tipWinnings').value = '';
+      }
+      updateSlipPreview();
+    }
+
+    // ── SLIP PREVIEW ──
+    function updateSlipPreview() {
+      const bookmaker = document.getElementById('tipBookmaker').value;
+      const sport = document.getElementById('tipSport').value;
+      const betId = document.getElementById('tipBetId').value;
+      const stake = document.getElementById('tipStake').value;
+      const winnings = document.getElementById('tipWinnings').value;
+      const isAcca = document.getElementById('btnAcca').classList.contains('active');
+
+      const preview = document.getElementById('slipPreview');
+      const content = document.getElementById('slipPreviewContent');
+
+      if (!bookmaker && !sport && !stake) { preview.style.display = 'none'; return; }
+
+      preview.style.display = 'block';
+      let rows = '';
+      if (bookmaker) rows += slipRow('Bookmaker', bookmaker);
+      if (betId) rows += slipRow('Bet ID', betId);
+      if (sport) rows += slipRow('Sport', sport);
+      rows += slipRow('Type', isAcca ? 'Accumulator' : 'Single');
+      if (isAcca) {
+        const legs = document.querySelectorAll('.leg-card').length;
+        const totalOdds = document.getElementById('tipTotalOdds').value;
+        if (legs > 0) rows += slipRow('Selections', legs + ' legs');
+        if (totalOdds) rows += `<div class="slip-row"><span class="slip-row-label">Total Odds</span><span class="slip-row-val gold">@${totalOdds}</span></div>`;
+      } else {
+        const odds = document.getElementById('tipOdds').value;
+        if (odds) rows += `<div class="slip-row"><span class="slip-row-label">Odds</span><span class="slip-row-val gold">@${odds}</span></div>`;
+      }
+      if (stake) rows += `<div class="slip-row"><span class="slip-row-label">Stake</span><span class="slip-row-val">₦${parseFloat(stake).toLocaleString()}</span></div>`;
+      if (winnings) rows += `<div class="slip-row"><span class="slip-row-label">Potential Win</span><span class="slip-row-val green">₦${parseFloat(winnings).toLocaleString()}</span></div>`;
+      content.innerHTML = rows;
+    }
+
+    function slipRow(label, val) {
+      return `<div class="slip-row"><span class="slip-row-label">${label}</span><span class="slip-row-val">${val}</span></div>`;
+    }
+
+    // ── BOOKING CODE IMPORT ──
+    function handleImportCode() {
+      const bookmaker = document.getElementById('codeBookmaker').value;
+      const code = document.getElementById('bookingCode').value.trim();
+      if (!bookmaker || !code) { alert('Please select a bookmaker and enter a booking code.'); return; }
+      const btn = document.getElementById('importBtnText');
+      btn.textContent = 'Importing...';
+      setTimeout(() => {
+        btn.textContent = 'Import Slip →';
+        // Pre-fill manual form and switch to it
+        document.getElementById('tipBookmaker').value = bookmaker;
+        document.getElementById('tipBetId').value = code;
+        switchMethod('manual');
+        switchBetType('acca');
+        // Add 3 sample legs for demonstration
+        addLeg(); addLeg(); addLeg();
+        alert('Slip imported! Please verify the details and confirm your selections below before locking.');
+      }, 1200);
+    }
+
+    // ── HANDLE SUBMIT TIP ──
+    function handleSubmitTip() {
+      const bookmaker = document.getElementById('tipBookmaker').value;
+      const sport = document.getElementById('tipSport').value;
+      const stake = document.getElementById('tipStake').value;
+      const isAcca = document.getElementById('btnAcca').classList.contains('active');
+
+      if (!bookmaker) { alert('Please select a bookmaker.'); return; }
+      if (!sport) { alert('Please select a sport type.'); return; }
+      if (!stake || parseFloat(stake) < 1) { alert('Please enter your stake amount.'); return; }
+
+      if (!isAcca) {
+        const match = document.getElementById('tipMatch').value.trim();
+        const sel = document.getElementById('tipSelection').value.trim();
+        const odds = parseFloat(document.getElementById('tipOdds').value);
+        const kickoff = document.getElementById('tipKickoff').value;
+        if (!match || !sel) { alert('Please fill in the match and selection.'); return; }
+        if (!odds || odds < 1.01) { alert('Please enter valid decimal odds.'); return; }
+        if (!kickoff || new Date(kickoff) <= new Date()) { alert('Kickoff must be in the future.'); return; }
+      } else {
+        const legs = document.querySelectorAll('.leg-card');
+        if (legs.length < 2) { alert('An accumulator needs at least 2 selections.'); return; }
+        const totalOdds = parseFloat(document.getElementById('tipTotalOdds').value);
+        if (!totalOdds || totalOdds < 1.01) { alert('Please enter or calculate total odds.'); return; }
+        const firstKickoff = document.getElementById('tipFirstKickoff').value;
+        if (!firstKickoff || new Date(firstKickoff) <= new Date()) { alert('First kickoff must be in the future.'); return; }
+      }
+
+      const btn = document.getElementById('lockTipBtn');
+      btn.classList.add('loading');
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        // Build summary
+        const isAccaNow = document.getElementById('btnAcca').classList.contains('active');
+        const bm = document.getElementById('tipBookmaker').value;
+        const sp = document.getElementById('tipSport').value;
+        const st = document.getElementById('tipStake').value;
+        const win = document.getElementById('tipWinnings').value;
+        const bid = document.getElementById('tipBetId').value;
+        const legs = document.querySelectorAll('.leg-card').length;
+        const totalOdds = isAccaNow ? document.getElementById('tipTotalOdds').value : document.getElementById('tipOdds').value;
+
+        document.getElementById('lockedSummary').innerHTML = `
+          <strong>Bookmaker:</strong> ${bm}<br/>
+          ${bid ? `<strong>Bet ID:</strong> ${bid}<br/>` : ''}
+          <strong>Type:</strong> ${isAccaNow ? 'Accumulator (' + legs + ' selections)' : 'Single'}<br/>
+          <strong>Sport:</strong> ${sp}<br/>
+          <strong>Total Odds:</strong> @${totalOdds}<br/>
+          <strong>Stake:</strong> ₦${parseFloat(st).toLocaleString()}<br/>
+          ${win ? `<strong>Potential Win:</strong> ₦${parseFloat(win).toLocaleString()}` : ''}
+        `;
+
+        document.getElementById('submitForm').style.display = 'none';
+        document.getElementById('tipSuccess').style.display = 'block';
+      }, 1400);
+    }
+
+    function resetSubmitForm() {
+      document.getElementById('submitForm').style.display = 'block';
+      document.getElementById('tipSuccess').style.display = 'none';
+      document.getElementById('tipBookmaker').value = '';
+      document.getElementById('tipBetId').value = '';
+      document.getElementById('tipSport').value = '';
+      document.getElementById('tipStake').value = '';
+      document.getElementById('tipWinnings').value = '';
+      document.getElementById('tipOdds').value = '';
+      document.getElementById('tipMatch').value = '';
+      document.getElementById('tipSelection').value = '';
+      document.getElementById('tipKickoff').value = '';
+      document.getElementById('legsList').innerHTML = '';
+      legCount = 0;
+      updateLegCount();
+      document.querySelectorAll('.sport-chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('slipPreview').style.display = 'none';
+      switchBetType('single');
+    }
+
+    // Animate score bar on load
+    window.addEventListener('load', () => {
+      setTimeout(() => { document.getElementById('progressFill').style.width = '23%'; }, 500);
+    });
+  </script>
+</body>
+</html>

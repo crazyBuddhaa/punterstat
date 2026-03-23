@@ -777,9 +777,7 @@
 
       setTimeout(() => {
         btn.classList.remove('loading');
-        // Show success screen
-        document.getElementById('formArea').style.display = 'none';
-        document.getElementById('successScreen').classList.add('show');
+        window.location.href = 'dashboard.html';
       }, 1400);
     }
 
@@ -811,7 +809,6 @@
 
       setTimeout(() => {
         btn.classList.remove('loading');
-        // For now redirect to dashboard placeholder
         window.location.href = 'dashboard.html';
       }, 1200);
     }
