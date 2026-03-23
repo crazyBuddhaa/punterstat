@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — Sign Up / Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --blue-light: #4B3FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --error: #f87171;
+      --success: #4ade80;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--blue);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* NOISE */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* GLOW */
+    .bg-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(75,63,255,0.4) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 5%;
+      position: relative;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-back {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--white-60);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--white); }
+
+    /* MAIN LAYOUT */
+    .auth-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.2rem 4rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .auth-card {
+      background: var(--navy);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 1.8rem;
+      padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2.8rem);
+      width: 100%;
+      max-width: 440px;
+      animation: fadeUp 0.55s ease both;
+    }
+
+    /* TOGGLE */
+    .toggle-wrap {
+      display: flex;
+      background: var(--white-10);
+      border-radius: 100px;
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      color: var(--white-60);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .toggle-btn.active {
+      background: var(--blue-bright);
+      color: var(--white);
+    }
+
+    /* HEADINGS */
+    .auth-heading {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 5vw, 2rem);
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-heading em {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .auth-sub {
+      font-size: 0.88rem;
+      color: var(--white-60);
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+    }
+
+    /* FORM */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--white-60);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .form-input-wrap {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--white-10);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 0.9rem;
+      padding: 0.85rem 1rem 0.85rem 2.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input::placeholder { color: rgba(255,255,255,0.28); }
+
+    .form-input:focus {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .form-input.error { border-color: var(--error); }
+    .form-input.success { border-color: var(--success); }
+
+    .input-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .input-toggle-pw {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--white-60);
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .input-toggle-pw:hover { color: var(--white); }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--error);
+      margin-top: 0.35rem;
+      display: none;
+    }
+
+    .field-error.show { display: block; }
+
+    /* USERNAME HINT */
+    .username-hint {
+      font-size: 0.75rem;
+      color: var(--white-60);
+      margin-top: 0.35rem;
+    }
+
+    /* PASSWORD STRENGTH */
+    .pw-strength {
+      display: flex;
+      gap: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .pw-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.3s;
+    }
+
+    .pw-bar.weak   { background: var(--error); }
+    .pw-bar.medium { background: var(--gold); }
+    .pw-bar.strong { background: var(--success); }
+
+    .pw-label {
+      font-size: 0.72rem;
+      margin-top: 0.3rem;
+      color: var(--white-60);
+    }
+
+    /* TERMS */
+    .terms-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      margin: 1.2rem 0;
+    }
+
+    .terms-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      background: transparent;
+      flex-shrink: 0;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      margin-top: 1px;
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .terms-check:checked {
+      background: var(--blue-bright);
+      border-color: var(--blue-bright);
+    }
+
+    .terms-check:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.65rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    .terms-text {
+      font-size: 0.78rem;
+      color: var(--white-60);
+      line-height: 1.5;
+    }
+
+    .terms-text a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    /* SUBMIT BTN */
+    .btn-submit {
+      width: 100%;
+      background: var(--white);
+      color: var(--blue);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.95rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      letter-spacing: -0.2px;
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    .btn-submit.loading {
+      color: transparent;
+      pointer-events: none;
+    }
+
+    .btn-submit.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(43,31,232,0.3);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* DIVIDER */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .divider-text {
+      font-size: 0.75rem;
+      color: var(--white-60);
+      font-weight: 500;
+    }
+
+    /* SWITCH LINK */
+    .switch-row {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--white-60);
+    }
+
+    .switch-row button {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* FORGOT */
+    .forgot-row {
+      text-align: right;
+      margin-top: -0.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .forgot-link {
+      font-size: 0.78rem;
+      color: var(--white-60);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover { color: var(--white); }
+
+    /* SUCCESS STATE */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 1rem 0;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .success-screen.show { display: block; }
+
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .success-screen h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.6rem;
+    }
+
+    .success-screen p {
+      color: var(--white-60);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .btn-dashboard {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 0.9rem 2rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,209,102,0.3);
+    }
+
+    /* GRADE TEASER */
+    .grade-teaser {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .grade-pip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* FORM PANEL TRANSITION */
+    .form-panel {
+      transition: opacity 0.25s, transform 0.25s;
+    }
+
+    .form-panel.hidden {
+      display: none;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .auth-card {
+        border-radius: 1.4rem;
+        padding: 1.8rem 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span class="logo-text">PunterStat.</span>
+    </a>
+    <a href="index.html" class="nav-back">← Back to home</a>
+  </nav>
+
+  <!-- AUTH WRAPPER -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- SUCCESS SCREEN -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">🏆</div>
+        <h2>You're in.<br/>Time to earn your grade.</h2>
+        <p>Your account is ready. Start submitting tips, build your verified record, and climb the leaderboard.</p>
+        <a href="dashboard.html" class="btn-dashboard">Go to Dashboard →</a>
+        <div class="grade-teaser">
+          <span class="grade-pip" style="background:rgba(205,127,50,0.15);color:#CD7F32;border:1px solid rgba(205,127,50,0.3)">🥉 Bronze</span>
+          <span class="grade-pip" style="background:rgba(192,192,192,0.1);color:#C0C0C0;border:1px solid rgba(192,192,192,0.2)">🥈 Silver</span>
+          <span class="grade-pip" style="background:rgba(255,209,102,0.12);color:#FFD166;border:1px solid rgba(255,209,102,0.3)">🥇 Gold</span>
+          <span class="grade-pip" style="background:rgba(125,249,255,0.1);color:#7DF9FF;border:1px solid rgba(125,249,255,0.25)">💎 Diamond</span>
+        </div>
+      </div>
+
+      <!-- FORM AREA -->
+      <div id="formArea">
+
+        <!-- TOGGLE -->
+        <div class="toggle-wrap">
+          <button class="toggle-btn active" id="btnSignup" onclick="switchTab('signup')">Create Account</button>
+          <button class="toggle-btn" id="btnLogin" onclick="switchTab('login')">Log In</button>
+        </div>
+
+        <!-- ── SIGN UP PANEL ── -->
+        <div class="form-panel" id="panelSignup">
+          <h1 class="auth-heading">Start building your<br/><em>verified</em> record.</h1>
+          <p class="auth-sub">Free to join. Your grade is earned — not claimed.</p>
+
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div class="form-input-wrap">
+              <span class="input-icon">@</span>
+              <input class="form-input" type="text" id="signupUsername" placeholder="yourhandle" autocomplete="off" oninput="validateUsername(this)" />
+            </div>
+            <p class="username-hint" id="usernameHint">This is your public identity on PunterStat.</p>
+            <p class="field-error" id="usernameError">Username must be 3–20 characters, no spaces.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="form-input-wrap">
+              <span class="input-icon">✉</span>
+              <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" oninput="validateEmail(this, 'signupEmailError')" />
+            </div>
+            <p class="field-error" id="signupEmailError">Please enter a valid email address.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="form-input-wrap">
+              <span class="input-icon">🔒</span>
+              <input class="form-input" type="password" id="signupPassword" placeholder="Min. 8 characters" oninput="checkStrength(this)" />
+              <button class="input-toggle-pw" type="button" onclick="togglePw('signupPassword', this)">Show</button>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+            </div>
+            <p class="pw-label" id="pwLabel">Enter a password</p>
+            <p class="field-error" id="signupPasswordError">Password must be at least 8 characters.</p>
+          </div>
+
+          <div class="terms-row">
+            <input type="checkbox" class="terms-check" id="termsCheck" />
+            <label class="terms-text" for="termsCheck">
+              I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand my tips are public and permanently recorded.
+            </label>
+          </div>
+
+          <button class="btn-submit" id="signupBtn" onclick="handleSignup()">Create My Account</button>
+          <p class="field-error" id="signupGeneralError" style="text-align:center; margin-top:0.6rem;"></p>
+
+          <div class="switch-row">
+            Already have an account? <button onclick="switchTab('login')">Log in</button>
+          </div>
+        </div>
+
+        <!-- ── LOGIN PANEL ── -->
+        <div class="form-panel hidden" id="panelLogin">
+          <h1 class="auth-heading">Welcome back.<br/><em>Own</em> your edge.</h1>
+          <p class="auth-sub">Log in to see your PunterScore and submit your next tip.</p>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="form-input-wrap">
+              <span class="input-icon">✉</span>
+              <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" oninput="validateEmail(this, 'loginEmailError')" />
+            </div>
+            <p class="field-error" id="loginEmailError">Please enter a valid email address.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="form-input-wrap">
+              <span class="input-icon">🔒</span>
+              <input class="form-input" type="password" id="loginPassword" placeholder="Your password" />
+              <button class="input-toggle-pw" type="button" onclick="togglePw('loginPassword', this)">Show</button>
+            </div>
+            <p class="field-error" id="loginPasswordError">Please enter your password.</p>
+          </div>
+
+          <div class="forgot-row">
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Log In to PunterStat.</button>
+          <p class="field-error" id="loginGeneralError" style="text-align:center; margin-top:0.6rem;"></p>
+
+          <div class="switch-row">
+            Don't have an account? <button onclick="switchTab('signup')">Sign up free</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── TAB SWITCH ──
+    function switchTab(tab) {
+      const isSignup = tab === 'signup';
+      document.getElementById('panelSignup').classList.toggle('hidden', !isSignup);
+      document.getElementById('panelLogin').classList.toggle('hidden', isSignup);
+      document.getElementById('btnSignup').classList.toggle('active', isSignup);
+      document.getElementById('btnLogin').classList.toggle('active', !isSignup);
+    }
+
+    // ── SHOW / HIDE PASSWORD ──
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.textContent = isHidden ? 'Hide' : 'Show';
+    }
+
+    // ── VALIDATE EMAIL ──
+    function validateEmail(input, errorId) {
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+      const err = document.getElementById(errorId);
+      if (input.value.length > 0) {
+        input.classList.toggle('error', !valid);
+        input.classList.toggle('success', valid);
+        err.classList.toggle('show', !valid);
+      }
+      return valid;
+    }
+
+    // ── VALIDATE USERNAME ──
+    function validateUsername(input) {
+      const val = input.value.trim();
+      const valid = /^[a-zA-Z0-9_]{3,20}$/.test(val);
+      const err = document.getElementById('usernameError');
+      const hint = document.getElementById('usernameHint');
+      if (val.length > 0) {
+        input.classList.toggle('error', !valid);
+        input.classList.toggle('success', valid);
+        err.classList.toggle('show', !valid);
+        hint.style.display = valid ? 'block' : 'none';
+      }
+      return valid;
+    }
+
+    // ── PASSWORD STRENGTH ──
+    function checkStrength(input) {
+      const val = input.value;
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
+      const label = document.getElementById('pwLabel');
+      bars.forEach(b => b.className = 'pw-bar');
+
+      if (val.length === 0) { label.textContent = 'Enter a password'; return; }
+
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      if (score === 1) {
+        bars[0].classList.add('weak');
+        label.textContent = 'Weak — add numbers or symbols';
+        label.style.color = '#f87171';
+      } else if (score === 2) {
+        bars[0].classList.add('medium'); bars[1].classList.add('medium');
+        label.textContent = 'Good — getting stronger';
+        label.style.color = '#FFD166';
+      } else {
+        bars.forEach(b => b.classList.add('strong'));
+        label.textContent = 'Strong password ✓';
+        label.style.color = '#4ade80';
+      }
+    }
+
+    // ── HANDLE SIGNUP ──
+    function handleSignup() {
+      const username = document.getElementById('signupUsername').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const terms = document.getElementById('termsCheck').checked;
+      const generalErr = document.getElementById('signupGeneralError');
+
+      let valid = true;
+
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        document.getElementById('signupUsername').classList.add('error');
+        document.getElementById('usernameError').classList.add('show');
+        valid = false;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('signupEmail').classList.add('error');
+        document.getElementById('signupEmailError').classList.add('show');
+        valid = false;
+      }
+
+      if (password.length < 8) {
+        document.getElementById('signupPassword').classList.add('error');
+        document.getElementById('signupPasswordError').classList.add('show');
+        valid = false;
+      }
+
+      if (!terms) {
+        generalErr.textContent = 'Please agree to the terms to continue.';
+        generalErr.classList.add('show');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Simulate loading
+      const btn = document.getElementById('signupBtn');
+      btn.classList.add('loading');
+      generalErr.classList.remove('show');
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        // Show success screen
+        document.getElementById('formArea').style.display = 'none';
+        document.getElementById('successScreen').classList.add('show');
+      }, 1400);
+    }
+
+    // ── HANDLE LOGIN ──
+    function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const generalErr = document.getElementById('loginGeneralError');
+
+      let valid = true;
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('loginEmail').classList.add('error');
+        document.getElementById('loginEmailError').classList.add('show');
+        valid = false;
+      }
+
+      if (password.length === 0) {
+        document.getElementById('loginPassword').classList.add('error');
+        document.getElementById('loginPasswordError').classList.add('show');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      const btn = document.getElementById('loginBtn');
+      btn.classList.add('loading');
+      generalErr.classList.remove('show');
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        // For now redirect to dashboard placeholder
+        window.location.href = 'dashboard.html';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>
