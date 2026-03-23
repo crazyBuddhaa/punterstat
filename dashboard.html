@@ -1583,8 +1583,152 @@
       }, 1200);
     }
 
+    // ── SUPABASE ──
+    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+
+    async function supaFetch(path, options = {}) {
+      const user = getUser();
+      const token = user?.access_token || SUPABASE_KEY;
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+      const data = await res.json();
+      return { data, ok: res.ok };
+    }
+
+    function getUser() {
+      try { return JSON.parse(localStorage.getItem('ps_user')); } catch { return null; }
+    }
+
+    // ── LOAD USER DATA ──
+    async function loadUserData() {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      // Update sidebar username
+      document.querySelector('.user-name').textContent = '@' + user.username;
+
+      // Fetch profile
+      const { data: profiles } = await supaFetch(`/rest/v1/users?id=eq.${user.id}&select=*`);
+      const profile = Array.isArray(profiles) ? profiles[0] : null;
+
+      if (profile) {
+        const grade = profile.grade || 'ungraded';
+        const score = profile.punter_score || 0;
+        const winRate = profile.win_rate || 0;
+        const roi = profile.roi || 0;
+        const streak = profile.current_streak || 0;
+        const totalTips = profile.total_tips || 0;
+        const settled = profile.settled_tips || 0;
+        const units = profile.units_profit || 0;
+        const avgOdds = profile.avg_odds || 0;
+
+        // Score hero
+        document.querySelector('.score-number').textContent = score;
+        document.querySelector('.score-sub').textContent = `Based on ${settled} settled tips · ${Math.max(0, 20 - settled)} more to unlock grade`;
+        document.querySelector('.grade-badge-large').textContent = gradeEmoji(grade) + ' ' + capitalize(grade);
+        document.querySelector('.user-grade').textContent = gradeEmoji(grade) + ' ' + capitalize(grade) + ' · ' + score + ' pts';
+
+        // Progress bar
+        const pct = Math.min(100, (score / 40) * 100);
+        document.getElementById('progressFill').style.width = pct + '%';
+
+        // Stats
+        const statVals = document.querySelectorAll('.stat-value');
+        if (statVals[0]) { statVals[0].textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%'; statVals[0].className = 'stat-value ' + (roi >= 0 ? 'positive' : 'negative'); }
+        if (statVals[1]) { statVals[1].textContent = winRate.toFixed(1) + '%'; }
+        if (statVals[2]) { statVals[2].textContent = streak; }
+        if (statVals[3]) { statVals[3].textContent = (units >= 0 ? '+' : '') + units.toFixed(1); statVals[3].className = 'stat-value ' + (units >= 0 ? 'positive' : 'negative'); }
+        if (statVals[4]) { statVals[4].textContent = totalTips; }
+        if (statVals[5]) { statVals[5].textContent = avgOdds.toFixed(2); }
+      }
+
+      // Load tips
+      loadTips();
+    }
+
+    function gradeEmoji(g) {
+      return { diamond:'💎', gold:'🥇', silver:'🥈', bronze:'🥉' }[g] || '🔒';
+    }
+
+    function capitalize(s) {
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    // ── LOAD TIPS ──
+    async function loadTips() {
+      const user = getUser();
+      if (!user) return;
+
+      const { data: tips } = await supaFetch(
+        `/rest/v1/tips?user_id=eq.${user.id}&order=submitted_at.desc&select=*`
+      );
+
+      if (!Array.isArray(tips) || tips.length === 0) {
+        document.getElementById('allTipsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No tips yet</h3>
+            <p>Submit your first tip to start building your verified record.</p>
+          </div>`;
+        return;
+      }
+
+      const sportEmoji = { Football:'⚽', Basketball:'🏀', Tennis:'🎾', 'Am. Football':'🏈', Cricket:'🏏', 'Ice Hockey':'🏒', 'Boxing/MMA':'🥊', Mixed:'🎲' };
+
+      const html = tips.map(t => {
+        const emoji = sportEmoji[t.sport] || '🎯';
+        const date = new Date(t.submitted_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+        const statusClass = { won:'status-won', lost:'status-lost', pending:'status-pending', void:'status-void' }[t.status] || 'status-pending';
+        const profit = t.status === 'won' ? `+${(t.potential_winnings - t.stake).toFixed(0)}` : t.status === 'lost' ? `-${t.stake}` : '—';
+        const profitClass = t.status === 'won' ? 'units-pos' : t.status === 'lost' ? 'units-neg' : 'units-neutral';
+        return `
+          <div class="tip-row" data-status="${t.status}">
+            <span class="tip-sport">${emoji}</span>
+            <div class="tip-info">
+              <div class="tip-match">${t.match_name || t.bet_type}</div>
+              <div class="tip-selection">${t.selection || t.bookmaker} · ${t.bet_type}</div>
+            </div>
+            <span class="tip-odds">@${t.odds}</span>
+            <span class="tip-date">${date}</span>
+            <span class="tip-status ${statusClass}">${capitalize(t.status)}</span>
+            <span class="tip-units ${profitClass}">₦${profit}</span>
+          </div>`;
+      }).join('');
+
+      document.getElementById('allTipsList').innerHTML = html;
+
+      // Also update overview recent tips
+      const recentHtml = tips.slice(0, 3).map(t => {
+        const emoji = sportEmoji[t.sport] || '🎯';
+        const date = new Date(t.submitted_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+        const statusClass = { won:'status-won', lost:'status-lost', pending:'status-pending', void:'status-void' }[t.status] || 'status-pending';
+        return `
+          <div class="tip-row">
+            <span class="tip-sport">${emoji}</span>
+            <div class="tip-info">
+              <div class="tip-match">${t.match_name || t.bet_type}</div>
+              <div class="tip-selection">${t.selection || t.bookmaker}</div>
+            </div>
+            <span class="tip-odds">@${t.odds}</span>
+            <span class="tip-date">${date}</span>
+            <span class="tip-status ${statusClass}">${capitalize(t.status)}</span>
+          </div>`;
+      }).join('');
+
+      const overviewTips = document.querySelector('#section-overview .tips-list');
+      if (overviewTips) overviewTips.innerHTML = recentHtml || overviewTips.innerHTML;
+    }
+
     // ── HANDLE SUBMIT TIP ──
-    function handleSubmitTip() {
+    async function handleSubmitTip() {
       const bookmaker = document.getElementById('tipBookmaker').value;
       const sport = document.getElementById('tipSport').value;
       const stake = document.getElementById('tipStake').value;
@@ -1594,51 +1738,96 @@
       if (!sport) { alert('Please select a sport type.'); return; }
       if (!stake || parseFloat(stake) < 1) { alert('Please enter your stake amount.'); return; }
 
+      let match = '', selection = '', odds = 0, kickoff = '';
+
       if (!isAcca) {
-        const match = document.getElementById('tipMatch').value.trim();
-        const sel = document.getElementById('tipSelection').value.trim();
-        const odds = parseFloat(document.getElementById('tipOdds').value);
-        const kickoff = document.getElementById('tipKickoff').value;
-        if (!match || !sel) { alert('Please fill in the match and selection.'); return; }
+        match = document.getElementById('tipMatch').value.trim();
+        selection = document.getElementById('tipSelection').value.trim();
+        odds = parseFloat(document.getElementById('tipOdds').value);
+        kickoff = document.getElementById('tipKickoff').value;
+        if (!match || !selection) { alert('Please fill in the match and selection.'); return; }
         if (!odds || odds < 1.01) { alert('Please enter valid decimal odds.'); return; }
         if (!kickoff || new Date(kickoff) <= new Date()) { alert('Kickoff must be in the future.'); return; }
       } else {
         const legs = document.querySelectorAll('.leg-card');
         if (legs.length < 2) { alert('An accumulator needs at least 2 selections.'); return; }
-        const totalOdds = parseFloat(document.getElementById('tipTotalOdds').value);
-        if (!totalOdds || totalOdds < 1.01) { alert('Please enter or calculate total odds.'); return; }
-        const firstKickoff = document.getElementById('tipFirstKickoff').value;
-        if (!firstKickoff || new Date(firstKickoff) <= new Date()) { alert('First kickoff must be in the future.'); return; }
+        odds = parseFloat(document.getElementById('tipTotalOdds').value);
+        if (!odds || odds < 1.01) { alert('Please enter or calculate total odds.'); return; }
+        kickoff = document.getElementById('tipFirstKickoff').value;
+        if (!kickoff || new Date(kickoff) <= new Date()) { alert('First kickoff must be in the future.'); return; }
+        match = `${legs.length}-leg accumulator`;
+        selection = 'Multiple selections';
       }
 
       const btn = document.getElementById('lockTipBtn');
       btn.classList.add('loading');
 
-      setTimeout(() => {
+      try {
+        const user = getUser();
+        if (!user) throw new Error('Not logged in.');
+
+        const winnings = parseFloat(document.getElementById('tipWinnings').value) || (odds * parseFloat(stake));
+        const betId = document.getElementById('tipBetId').value;
+        const legsCount = isAcca ? document.querySelectorAll('.leg-card').length : 1;
+
+        const { ok, data } = await supaFetch('/rest/v1/tips', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            user_id: user.id,
+            bet_type: isAcca ? 'accumulator' : 'single',
+            bookmaker,
+            bet_id: betId || null,
+            sport,
+            match_name: match,
+            selection,
+            odds,
+            stake: parseFloat(stake),
+            potential_winnings: winnings,
+            legs_count: legsCount,
+            status: 'pending',
+            kickoff_time: new Date(kickoff).toISOString(),
+            locked: true
+          })
+        });
+
+        if (!ok) throw new Error(data?.message || 'Failed to save tip.');
+
         btn.classList.remove('loading');
-        // Build summary
-        const isAccaNow = document.getElementById('btnAcca').classList.contains('active');
-        const bm = document.getElementById('tipBookmaker').value;
-        const sp = document.getElementById('tipSport').value;
-        const st = document.getElementById('tipStake').value;
-        const win = document.getElementById('tipWinnings').value;
-        const bid = document.getElementById('tipBetId').value;
-        const legs = document.querySelectorAll('.leg-card').length;
-        const totalOdds = isAccaNow ? document.getElementById('tipTotalOdds').value : document.getElementById('tipOdds').value;
+
+        // Update total_tips count
+        await supaFetch(`/rest/v1/users?id=eq.${user.id}`, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ total_tips: (getUser()?.total_tips || 0) + 1 })
+        });
+
+        // Show summary
+        const bm = bookmaker;
+        const sp = sport;
+        const st = stake;
+        const win = winnings;
 
         document.getElementById('lockedSummary').innerHTML = `
           <strong>Bookmaker:</strong> ${bm}<br/>
-          ${bid ? `<strong>Bet ID:</strong> ${bid}<br/>` : ''}
-          <strong>Type:</strong> ${isAccaNow ? 'Accumulator (' + legs + ' selections)' : 'Single'}<br/>
+          ${betId ? `<strong>Bet ID:</strong> ${betId}<br/>` : ''}
+          <strong>Type:</strong> ${isAcca ? 'Accumulator (' + legsCount + ' selections)' : 'Single'}<br/>
           <strong>Sport:</strong> ${sp}<br/>
-          <strong>Total Odds:</strong> @${totalOdds}<br/>
+          <strong>Total Odds:</strong> @${odds}<br/>
           <strong>Stake:</strong> ₦${parseFloat(st).toLocaleString()}<br/>
-          ${win ? `<strong>Potential Win:</strong> ₦${parseFloat(win).toLocaleString()}` : ''}
+          <strong>Potential Win:</strong> ₦${parseFloat(win).toLocaleString()}
         `;
 
         document.getElementById('submitForm').style.display = 'none';
         document.getElementById('tipSuccess').style.display = 'block';
-      }, 1400);
+
+        // Reload tips
+        loadTips();
+
+      } catch (err) {
+        btn.classList.remove('loading');
+        alert('Error: ' + err.message);
+      }
     }
 
     function resetSubmitForm() {
@@ -1661,9 +1850,9 @@
       switchBetType('single');
     }
 
-    // Animate score bar on load
+    // Load on start
     window.addEventListener('load', () => {
-      setTimeout(() => { document.getElementById('progressFill').style.width = '23%'; }, 500);
+      loadUserData();
     });
   </script>
 </body>
