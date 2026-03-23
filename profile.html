@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>@SharpPunter — PunterStat.</title>
+
+  <!-- Open Graph (for share previews) -->
+  <meta property="og:title" content="@SharpPunter on PunterStat." />
+  <meta property="og:description" content="🥇 Gold · PunterScore 67 · +18.4% ROI · Verified tipster" />
+  <meta property="og:url" content="https://punterstat.vercel.app/profile.html" />
+  <meta property="og:type" content="profile" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --success: #4ade80;
+      --error: #f87171;
+      --diamond: #7DF9FF;
+      --bronze: #CD7F32;
+      --silver: #C0C0C0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* NOISE */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 5%;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11,19,64,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .nav-logo img { width: 30px; height: 30px; object-fit: contain; }
+
+    .nav-logo span {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--white);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.7rem; }
+
+    .btn-nav {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-nav-ghost {
+      background: transparent;
+      color: var(--white-60);
+      border: 1.5px solid var(--white-20);
+    }
+
+    .btn-nav-ghost:hover { color: var(--white); border-color: var(--white-30); }
+
+    .btn-nav-solid {
+      background: var(--white);
+      color: var(--blue);
+    }
+
+    .btn-nav-solid:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+
+    /* HERO BANNER */
+    .profile-banner {
+      background: linear-gradient(135deg, var(--blue-bright) 0%, #1508c8 100%);
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-banner::before {
+      content: '';
+      position: absolute;
+      right: -80px; top: -80px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .profile-banner::after {
+      content: '';
+      position: absolute;
+      left: 30%; bottom: -100px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* PROFILE HEADER */
+    .profile-header {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 5%;
+      position: relative;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-top: -48px;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue-bright), var(--diamond));
+      border: 4px solid var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .verified-ring {
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 2.5px solid var(--gold);
+      animation: rotate 8s linear infinite;
+      background: conic-gradient(var(--gold) 0deg, transparent 90deg, var(--gold) 180deg, transparent 270deg, var(--gold) 360deg);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px));
+    }
+
+    .profile-meta {
+      padding: 1.2rem 0 0;
+    }
+
+    .profile-top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .profile-name-block {}
+
+    .profile-username {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .profile-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-verified {
+      background: rgba(255,209,102,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(255,209,102,0.3);
+    }
+
+    .badge-grade-gold {
+      background: rgba(255,209,102,0.15);
+      color: var(--gold);
+      border: 1px solid rgba(255,209,102,0.35);
+    }
+
+    .badge-grade-diamond {
+      background: rgba(125,249,255,0.12);
+      color: var(--diamond);
+      border: 1px solid rgba(125,249,255,0.3);
+    }
+
+    .badge-grade-silver {
+      background: rgba(192,192,192,0.12);
+      color: var(--silver);
+      border: 1px solid rgba(192,192,192,0.25);
+    }
+
+    .badge-grade-bronze {
+      background: rgba(205,127,50,0.12);
+      color: var(--bronze);
+      border: 1px solid rgba(205,127,50,0.25);
+    }
+
+    .badge-sport {
+      background: var(--white-10);
+      color: var(--white-60);
+      border: 1px solid var(--white-20);
+    }
+
+    .profile-bio {
+      font-size: 0.88rem;
+      color: var(--white-60);
+      margin-top: 0.8rem;
+      line-height: 1.65;
+      max-width: 480px;
+    }
+
+    .profile-joined {
+      font-size: 0.75rem;
+      color: var(--white-30);
+      margin-top: 0.5rem;
+    }
+
+    /* ACTION BUTTONS */
+    .profile-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .btn-share {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--white-10);
+      border: 1.5px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.6rem 1.2rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-share:hover { background: var(--white-20); border-color: var(--white-30); }
+
+    .btn-share.copied {
+      background: rgba(74,222,128,0.12);
+      border-color: rgba(74,222,128,0.3);
+      color: var(--success);
+    }
+
+    /* DIVIDER */
+    .profile-divider {
+      max-width: 780px;
+      margin: 1.5rem auto 0;
+      padding: 0 5%;
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    /* CONTENT */
+    .profile-content {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem 5%;
+    }
+
+    /* PUNTERSCORE CARD */
+    .score-card {
+      background: linear-gradient(135deg, var(--blue-bright) 0%, #1508c8 100%);
+      border-radius: 1.5rem;
+      padding: 1.8rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      flex-wrap: wrap;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .score-card::before {
+      content: '';
+      position: absolute;
+      right: -50px; top: -50px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+
+    .score-card-left { position: relative; z-index: 2; }
+
+    .score-card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.3rem;
+    }
+
+    .score-card-number {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 10vw, 4.5rem);
+      letter-spacing: -3px;
+      line-height: 1;
+    }
+
+    .score-card-sub {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 0.4rem;
+    }
+
+    .score-card-right {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+
+    .score-grade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 0.5rem 1.2rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .score-verified {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+
+    .stat-card {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.2rem;
+      padding: 1.2rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--white-30); }
+
+    .stat-icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+    .stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .stat-value.positive { color: var(--success); }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.neutral { color: var(--white); }
+
+    .stat-label {
+      font-size: 0.73rem;
+      color: var(--white-60);
+      margin-top: 0.3rem;
+      font-weight: 500;
+    }
+
+    /* PROOF STRIP */
+    .proof-strip {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.2rem;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    .proof-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    .proof-text {
+      flex: 1;
+      font-size: 0.82rem;
+      color: var(--white-60);
+      line-height: 1.55;
+      min-width: 180px;
+    }
+
+    .proof-text strong { color: var(--white); }
+
+    .proof-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(74,222,128,0.1);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 100px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--success);
+      flex-shrink: 0;
+    }
+
+    .proof-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* SHARE MODAL */
+    .share-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .share-modal.open { display: flex; }
+
+    .share-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    .share-sheet {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 2;
+      animation: slideUp 0.3s ease both;
+    }
+
+    .share-sheet-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .share-sheet-sub {
+      font-size: 0.82rem;
+      color: var(--white-60);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .share-url-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      background: var(--white-10);
+      border: 1px solid var(--white-20);
+      border-radius: 0.8rem;
+      padding: 0.7rem 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .share-url {
+      flex: 1;
+      font-size: 0.8rem;
+      color: var(--white-60);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-copy {
+      background: var(--blue-bright);
+      border: none;
+      border-radius: 0.6rem;
+      padding: 0.4rem 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--white);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .btn-copy:hover { background: var(--blue); }
+    .btn-copy.copied { background: var(--success); color: var(--navy); }
+
+    .share-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .share-opt {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--white-10);
+      border: 1px solid var(--white-20);
+      border-radius: 0.9rem;
+      padding: 0.8rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s;
+      border: none;
+    }
+
+    .share-opt:hover { background: var(--white-20); }
+    .share-opt-icon { font-size: 1.1rem; }
+
+    .btn-close-modal {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.7rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--white-60);
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-close-modal:hover { border-color: var(--white-30); color: var(--white); }
+
+    /* FOOTER */
+    .profile-footer {
+      text-align: center;
+      padding: 2rem 5% 3rem;
+      border-top: 1px solid var(--white-20);
+      margin-top: 2rem;
+    }
+
+    .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-logo img { width: 22px; height: 22px; object-fit: contain; }
+
+    .footer-logo span {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--white);
+    }
+
+    .footer-tagline {
+      font-size: 0.78rem;
+      color: var(--white-30);
+      margin-bottom: 1rem;
+    }
+
+    .btn-join {
+      display: inline-block;
+      background: var(--white);
+      color: var(--blue);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 0.75rem 1.8rem;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-join:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .profile-top-row { flex-direction: column; }
+      .profile-actions { width: 100%; }
+      .btn-share { flex: 1; justify-content: center; }
+      .score-card { flex-direction: column; align-items: flex-start; }
+      .score-card-right { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+    <div class="nav-actions">
+      <a href="auth.html" class="btn-nav btn-nav-ghost">Log In</a>
+      <a href="auth.html" class="btn-nav btn-nav-solid">Sign Up Free</a>
+    </div>
+  </nav>
+
+  <!-- BANNER -->
+  <div class="profile-banner"></div>
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="avatar-wrap">
+      <div class="verified-ring"></div>
+      <div class="avatar">SP</div>
+    </div>
+
+    <div class="profile-meta">
+      <div class="profile-top-row">
+        <div class="profile-name-block">
+          <div class="profile-username">@SharpPunter</div>
+          <div class="profile-badges">
+            <span class="badge badge-verified">✓ Verified</span>
+            <span class="badge badge-grade-gold">🥇 Gold</span>
+            <span class="badge badge-sport">⚽ Football</span>
+            <span class="badge badge-sport">🎾 Tennis</span>
+          </div>
+          <p class="profile-bio">Value hunter. I only tip what I'd stake myself. All tips verified on PunterStat. before kickoff — no screenshots, no excuses.</p>
+          <p class="profile-joined">📅 Member since January 2026 · 147 tips submitted</p>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn-share" id="shareBtn" onclick="openShareModal()">
+            🔗 Share Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-divider"></div>
+
+  <!-- CONTENT -->
+  <div class="profile-content">
+
+    <!-- PUNTERSCORE CARD -->
+    <div class="score-card">
+      <div class="score-card-left">
+        <div class="score-card-label">PunterScore™</div>
+        <div class="score-card-number">67</div>
+        <div class="score-card-sub">Based on 147 verified tips · Auto-settled</div>
+      </div>
+      <div class="score-card-right">
+        <div class="score-grade-badge">🥇 Gold</div>
+        <div class="score-verified">
+          <span>⚡</span> Results verified by live data feed
+        </div>
+        <div class="score-verified" style="color:var(--white-60);">
+          Last updated · Mar 23, 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value positive">+18.4%</div>
+        <div class="stat-label">ROI (All time)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value gold">64.6%</div>
+        <div class="stat-label">Win Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value gold">5</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value positive">+27.1</div>
+        <div class="stat-label">Units Profit</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value neutral">147</div>
+        <div class="stat-label">Total Tips</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value gold">2.14</div>
+        <div class="stat-label">Avg Odds</div>
+      </div>
+    </div>
+
+    <!-- PROOF STRIP -->
+    <div class="proof-strip">
+      <span class="proof-icon">🔒</span>
+      <div class="proof-text">
+        <strong>All tips on this profile are tamper-proof.</strong> Every tip was submitted before kickoff and settled automatically by a live sports data feed. No editing. No cherry-picking. What you see is the real record.
+      </div>
+      <span class="proof-tag">
+        <span class="proof-dot"></span> Auto-Verified
+      </span>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="profile-footer">
+    <a href="index.html" class="footer-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+    <p class="footer-tagline">Earn your grade. Own your edge.</p>
+    <a href="auth.html" class="btn-join">Build Your Own Verified Record →</a>
+    <p style="font-size:0.72rem; color:var(--white-30); margin-top:1.2rem;">a theosnnetwork. product</p>
+  </div>
+
+  <!-- SHARE MODAL -->
+  <div class="share-modal" id="shareModal">
+    <div class="share-backdrop" onclick="closeShareModal()"></div>
+    <div class="share-sheet">
+      <div class="share-sheet-title">Share @SharpPunter's Profile</div>
+      <p class="share-sheet-sub">Share this verified tipster profile. Anyone with the link can see their full record — no account needed.</p>
+
+      <div class="share-url-row">
+        <span class="share-url" id="shareUrl">punterstat.vercel.app/profile.html</span>
+        <button class="btn-copy" id="copyBtn" onclick="copyLink()">Copy</button>
+      </div>
+
+      <div class="share-options">
+        <button class="share-opt" onclick="shareToX()">
+          <span class="share-opt-icon">𝕏</span> Share on X
+        </button>
+        <button class="share-opt" onclick="shareToWhatsApp()">
+          <span class="share-opt-icon">💬</span> WhatsApp
+        </button>
+        <button class="share-opt" onclick="shareToTelegram()">
+          <span class="share-opt-icon">✈️</span> Telegram
+        </button>
+        <button class="share-opt" onclick="nativeShare()">
+          <span class="share-opt-icon">📤</span> More options
+        </button>
+      </div>
+
+      <button class="btn-close-modal" onclick="closeShareModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const PROFILE_URL = window.location.href;
+    const PROFILE_NAME = '@SharpPunter';
+    const PROFILE_TEXT = `${PROFILE_NAME} on PunterStat. — 🥇 Gold · PunterScore 67 · +18.4% ROI · All tips verified before kickoff.`;
+
+    // ── SHARE MODAL ──
+    function openShareModal() {
+      document.getElementById('shareUrl').textContent = PROFILE_URL;
+      document.getElementById('shareModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // ── COPY LINK ──
+    function copyLink() {
+      navigator.clipboard.writeText(PROFILE_URL).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        shareBtn.textContent = '✓ Link Copied';
+        shareBtn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+          shareBtn.innerHTML = '🔗 Share Profile';
+          shareBtn.classList.remove('copied');
+        }, 2500);
+      }).catch(() => {
+        // Fallback
+        const el = document.createElement('textarea');
+        el.value = PROFILE_URL;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('Link copied!');
+      });
+    }
+
+    // ── SHARE OPTIONS ──
+    function shareToX() {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(PROFILE_TEXT)}&url=${encodeURIComponent(PROFILE_URL)}`, '_blank');
+    }
+
+    function shareToWhatsApp() {
+      window.open(`https://wa.me/?text=${encodeURIComponent(PROFILE_TEXT + ' ' + PROFILE_URL)}`, '_blank');
+    }
+
+    function shareToTelegram() {
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(PROFILE_URL)}&text=${encodeURIComponent(PROFILE_TEXT)}`, '_blank');
+    }
+
+    function nativeShare() {
+      if (navigator.share) {
+        navigator.share({
+          title: `${PROFILE_NAME} on PunterStat.`,
+          text: PROFILE_TEXT,
+          url: PROFILE_URL
+        }).catch(() => {});
+      } else {
+        copyLink();
+      }
+    }
+  </script>
+</body>
+</html>
