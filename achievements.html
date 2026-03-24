@@ -39,7 +39,7 @@
       overflow-x: hidden;
     }
 
-    /* SIDEBAR (Matched to your global style) */
+    /* SIDEBAR */
     .sidebar { width: var(--sidebar-w); background: var(--navy-card); border-right: 1px solid var(--white-20); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s ease; overflow-y: auto; }
     .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 1.4rem 1.4rem 1.2rem; text-decoration: none; border-bottom: 1px solid var(--white-20); flex-shrink: 0; }
     .sidebar-logo img { width: 30px; height: 30px; object-fit: contain; }
@@ -51,7 +51,7 @@
     .nav-item.active { background: var(--blue-bright); color: var(--white); }
     .nav-icon { font-size: 0.95rem; flex-shrink: 0; }
     .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 100px; }
-    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; }
+    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; cursor: pointer; }
     .sidebar-logout:hover { color: var(--error); }
 
     /* MAIN */
@@ -160,13 +160,11 @@
 
     .badge-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.25); }
 
-    /* UNLOCKED STATE */
     .badge-card.unlocked { border-color: rgba(255,209,102,0.3); background: linear-gradient(180deg, rgba(255,209,102,0.05) 0%, var(--navy-card2) 100%); }
     .badge-card.unlocked .badge-icon-wrap { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,209,102,0.15); filter: grayscale(0%); opacity: 1; }
     .badge-card.unlocked .badge-title { color: var(--gold); }
     .badge-card.unlocked .badge-date { display: block; }
-    
-    /* LOCKED STATE */
+
     .badge-card.locked .badge-icon-wrap { filter: grayscale(100%); opacity: 0.4; border-color: var(--white-20); }
     .badge-card.locked .badge-title { color: var(--white-60); }
     .badge-card.locked .lock-icon { display: flex; }
@@ -202,7 +200,7 @@
 
     .badge-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; margin-bottom: 0.4rem; letter-spacing: -0.2px; }
     .badge-desc { font-size: 0.75rem; color: var(--white-60); line-height: 1.5; margin-bottom: 1rem; }
-    
+
     .badge-date { font-size: 0.65rem; font-weight: 700; color: rgba(74,222,128,0.9); text-transform: uppercase; letter-spacing: 0.05em; display: none; margin-top: auto; }
 
     .badge-progress-wrap { display: none; margin-top: auto; }
@@ -250,7 +248,7 @@
       <a class="nav-item active" href="achievements.html"><span class="nav-icon">🎖️</span> Achievements</a>
       <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Public Profile</a>
     </nav>
-    <a href="auth.html" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
+    <a href="#" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
   </aside>
 
   <div class="main">
@@ -283,147 +281,130 @@
       </div>
 
       <div class="achievements-grid" id="badgeGrid">
-        
+
         <div class="badge-card unlocked" data-status="unlocked">
-          <div class="badge-icon-wrap">
-            🎯
-          </div>
+          <div class="badge-icon-wrap">🎯</div>
           <div class="badge-title">First Blood</div>
           <div class="badge-desc">Submit and settle your very first verified tip on PunterStat.</div>
           <div class="badge-date">✓ Earned Mar 12, 2026</div>
         </div>
 
         <div class="badge-card unlocked" data-status="unlocked">
-          <div class="badge-icon-wrap">
-            🔥
-          </div>
+          <div class="badge-icon-wrap">🔥</div>
           <div class="badge-title">Hot Streak</div>
           <div class="badge-desc">Win 3 verified tips in a row without a single loss or void.</div>
           <div class="badge-date">✓ Earned Mar 15, 2026</div>
         </div>
 
         <div class="badge-card unlocked" data-status="unlocked">
-          <div class="badge-icon-wrap">
-            🧠
-          </div>
+          <div class="badge-icon-wrap">🧠</div>
           <div class="badge-title">Value Hunter</div>
           <div class="badge-desc">Successfully win a single selection with odds of 2.50 or higher.</div>
           <div class="badge-date">✓ Earned Mar 18, 2026</div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            ☄️
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">☄️<div class="lock-icon">🔒</div></div>
           <div class="badge-title">On Fire</div>
           <div class="badge-desc">Win 5 verified tips in a row without a single loss or void.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>3 / 5</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 60%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:60%"></div></div>
           </div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            🎖️
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">🎖️<div class="lock-icon">🔒</div></div>
           <div class="badge-title">Veteran</div>
           <div class="badge-desc">Reach a total of 50 settled tips on your account.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>14 / 50</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 28%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:28%"></div></div>
           </div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            🦅
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">🦅<div class="lock-icon">🔒</div></div>
           <div class="badge-title">Sniper</div>
           <div class="badge-desc">Win a verified single selection tip with odds of 5.00 or higher.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>0 / 1</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 0%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:0%"></div></div>
           </div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            ⛓️
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">⛓️<div class="lock-icon">🔒</div></div>
           <div class="badge-title">Acca King</div>
           <div class="badge-desc">Win an accumulator tip consisting of 5 or more legs.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>0 / 1</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 0%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:0%"></div></div>
           </div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            👑
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">👑<div class="lock-icon">🔒</div></div>
           <div class="badge-title">Centurion</div>
           <div class="badge-desc">Reach the incredible milestone of 100 settled tips.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>14 / 100</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 14%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:14%"></div></div>
           </div>
         </div>
 
         <div class="badge-card locked" data-status="locked">
-          <div class="badge-icon-wrap">
-            💎
-            <div class="lock-icon">🔒</div>
-          </div>
+          <div class="badge-icon-wrap">💎<div class="lock-icon">🔒</div></div>
           <div class="badge-title">Diamond Hands</div>
           <div class="badge-desc">Maintain a PunterScore of 85+ (Diamond Grade) for 30 consecutive days.</div>
           <div class="badge-progress-wrap">
             <div class="badge-progress-text"><span>Progress</span><span>0 / 30 Days</span></div>
-            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width: 0%"></div></div>
+            <div class="badge-progress-bar"><div class="badge-progress-fill" style="width:0%"></div></div>
           </div>
         </div>
 
       </div>
-
     </div>
   </div>
 
   <script>
-    function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    // ── Auth helpers (matches dashboard.html pattern) ──
+    function getUser() {
+      try { return JSON.parse(localStorage.getItem('ps_user')); }
+      catch { return null; }
+    }
+
+    function logout(e) {
+      e.preventDefault();
+      localStorage.removeItem('ps_user');
+      window.location.href = 'auth.html';
+    }
+
+    // ── Auth guard ──
+    window.addEventListener('load', () => {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      // Set avatar initials
+      if (user.username) {
+        document.getElementById('topbarAvatar').textContent = user.username.slice(0, 2).toUpperCase();
+      }
+    });
+
+    // ── Sidebar ──
+    function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open');    }
     function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
+    // ── Badge filter ──
     function filterBadges(btn) {
-      // Update active tab
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
 
       const filter = btn.dataset.filter;
-      const cards = document.querySelectorAll('.badge-card');
-
-      cards.forEach(card => {
-        if (filter === 'all') {
-          card.style.display = 'block';
-        } else {
-          card.style.display = card.dataset.status === filter ? 'block' : 'none';
-        }
+      document.querySelectorAll('.badge-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
       });
     }
-
-    // Set Avatar Initials
-    window.addEventListener('load', () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('ps_user'));
-        if (user && user.username) {
-          document.getElementById('topbarAvatar').textContent = user.username.slice(0,2).toUpperCase();
-        }
-      } catch(e) {}
-    });
   </script>
 </body>
 </html>
