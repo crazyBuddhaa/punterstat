@@ -648,7 +648,16 @@
     </div>
   </div>
 
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <script>
+    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+    
+    // Initialize Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     // Check if already logged in
     const existingUser = localStorage.getItem('ps_user');
     if (existingUser) {
@@ -660,11 +669,11 @@
       const hash = window.location.hash;
       if (hash && hash.includes('access_token')) {
         // They clicked email link but landed here instead of confirm.html
-        // Extract token and redirect to proper confirmation page
+        // Redirect to proper confirmation page
         window.location.href = 'confirm.html' + hash;
         return;
       }
-      
+
       // Check for error params
       const params = new URLSearchParams(window.location.search);
       if (params.get('error')) {
@@ -719,7 +728,7 @@
       const label = document.getElementById('pwLabel');
       bars.forEach(b => b.className = 'pw-bar');
 
-      if (val.length === 0) { label.textContent = 'Enter a password'; return; }
+      if (val.length === 0) { label.textContent = 'Enter a password'; label.style.color = 'var(--white-60)'; return; }
 
       let score = 0;
       if (val.length >= 8) score++;
@@ -741,9 +750,7 @@
       }
     }
 
-    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
-
+    // REST API helper for non-auth operations
     async function supaFetch(path, options = {}) {
       const res = await fetch(`${SUPABASE_URL}${path}`, {
         headers: {
@@ -798,37 +805,33 @@
       generalErr.classList.remove('show');
 
       try {
-        // 1. Check username availability first
+        // Check username availability first
         const { data: existingUser } = await supaFetch(
-          `/rest/v1/users?username=eq.${username}&select=username`
+          `/rest/v1/users?username=eq.${encodeURIComponent(username)}&select=username`
         );
 
         if (existingUser && existingUser.length > 0) {
           throw new Error('Username already taken. Try another.');
         }
 
-        // 2. Create auth user ONLY (profile created by database trigger)
-        const { data: authData, ok: authOk } = await supaFetch('/auth/v1/signup', {
-          method: 'POST',
-          body: JSON.stringify({ 
-            email, 
-            password,
-            options: {
-              data: { username },  // Passed to trigger via raw_user_meta_data
-              email_redirect_to: 'https://punterstat.vercel.app/confirm.html'
-            }
-          })
+        // Use Supabase JS client for signup with proper email redirect
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { username },
+            emailRedirectTo: 'https://punterstat.vercel.app/confirm.html'
+          }
         });
 
-        if (!authOk) {
-          throw new Error(authData.msg || authData.message || 'Sign up failed.');
-        }
+        if (authError) throw authError;
 
+        // Check if user already exists (signUp returns user with no identities if email exists)
         if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
           throw new Error('This email is already registered. Try logging in.');
         }
 
-        // 3. Save pending for display purposes
+        // Save pending for display
         localStorage.setItem('ps_pending', JSON.stringify({ username, email }));
         btn.classList.remove('loading');
 
@@ -839,13 +842,15 @@
 
       } catch (err) {
         btn.classList.remove('loading');
-        
+
         // Handle specific errors
-        if (err.message.includes('already registered') || err.message.includes('already taken')) {
+        if (err.message.includes('already registered') || 
+            err.message.includes('already taken') ||
+            err.message.includes('already exists')) {
           generalErr.textContent = err.message;
           setTimeout(() => switchTab('login'), 3000);
         } else {
-          generalErr.textContent = err.message;
+          generalErr.textContent = err.message || 'Sign up failed. Please try again.';
         }
         generalErr.classList.add('show');
       }
@@ -877,52 +882,56 @@
       generalErr.classList.remove('show');
 
       try {
-        const { data, ok } = await supaFetch('/auth/v1/token?grant_type=password', {
-          method: 'POST',
-          body: JSON.stringify({ email, password })
+        // Use Supabase JS client for login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
         });
 
-        if (!ok) {
-          throw new Error(data.error_description || data.msg || 'Invalid email or password.');
-        }
+        if (error) throw error;
 
-        // Check for profile (handles orphaned users from before trigger)
-        const { data: profiles } = await supaFetch(
-          `/rest/v1/users?id=eq.${data.user.id}&select=*`,
-          { headers: { 'Authorization': `Bearer ${data.access_token}` } }
-        );
+        // Check for profile
+        const { data: profiles, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
 
-        let profile = profiles && profiles[0];
+        let profile = profiles;
 
         // Auto-create profile if missing (recovery for orphaned users)
-        if (!profile) {
-          await supaFetch('/rest/v1/users', {
-            method: 'POST',
-            headers: { 
-              'Authorization': `Bearer ${data.access_token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+        if (!profile || profileError) {
+          const username = data.user.user_metadata?.username || data.user.email.split('@')[0];
+          
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
               id: data.user.id,
-              username: data.user.user_metadata?.username || data.user.email.split('@')[0],
+              username: username,
               email: data.user.email,
               grade: 'ungraded',
-              punter_score: 0
+              punter_score: 0,
+              total_tips: 0,
+              settled_tips: 0
             })
-          });
-          profile = { 
-            username: data.user.user_metadata?.username || data.user.email.split('@')[0],
-            grade: 'ungraded',
-            punter_score: 0 
-          };
+            .select()
+            .single();
+
+          if (createError) {
+            console.warn('Profile creation failed:', createError);
+            profile = { username, grade: 'ungraded', punter_score: 0 };
+          } else {
+            profile = newProfile;
+          }
         }
 
+        // Save to localStorage
         localStorage.setItem('ps_user', JSON.stringify({
           id: data.user.id,
           username: profile.username,
           email: data.user.email,
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
           grade: profile.grade || 'ungraded',
           punter_score: profile.punter_score || 0
         }));
@@ -932,7 +941,7 @@
 
       } catch (err) {
         btn.classList.remove('loading');
-        generalErr.textContent = err.message;
+        generalErr.textContent = err.message || 'Login failed. Please check your credentials.';
         generalErr.classList.add('show');
       }
     }
@@ -940,33 +949,27 @@
     async function handleForgotPassword() {
       const email = document.getElementById('loginEmail').value;
       const msgDiv = document.getElementById('forgotMessage');
-      
+
       if (!email || !email.includes('@')) {
         document.getElementById('loginEmail').classList.add('error');
         document.getElementById('loginEmailError').textContent = 'Enter your email first';
         document.getElementById('loginEmailError').classList.add('show');
         return;
       }
-      
+
       try {
-        const { ok, data } = await supaFetch('/auth/v1/recover', {
-          method: 'POST',
-          body: JSON.stringify({ 
-            email,
-            options: {
-              redirect_to: 'https://punterstat.vercel.app/auth.html'
-            }
-          })
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://punterstat.vercel.app/auth.html'
         });
-        
-        if (!ok) throw new Error(data.msg || 'Failed to send reset email');
-        
+
+        if (error) throw error;
+
         msgDiv.textContent = 'Reset link sent! Check your email.';
         msgDiv.style.display = 'block';
         setTimeout(() => msgDiv.style.display = 'none', 5000);
-        
+
       } catch (err) {
-        alert(err.message);
+        alert(err.message || 'Failed to send reset email.');
       }
     }
   </script>
