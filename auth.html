@@ -81,6 +81,8 @@
     .auth-heading { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.8rem; letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 0.5rem; }
     .auth-heading em { font-style: italic; color: var(--gold); }
 
+    .auth-sub { font-size: 0.88rem; color: var(--white-60); margin-bottom: 1.8rem; line-height: 1.6; }
+
     .form-group { margin-bottom: 1.1rem; }
     .form-label { font-size: 0.78rem; font-weight: 600; color: var(--white-60); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em; }
 
@@ -93,15 +95,29 @@
     .form-input.error { border-color: var(--error); }
 
     .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+    .input-toggle-pw { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--white-60); }
 
     .field-error { font-size: 0.75rem; color: var(--error); margin-top: 0.3rem; display: none; }
     .field-error.show { display: block; }
 
+    .username-hint { font-size: 0.75rem; color: var(--white-60); margin-top: 0.35rem; }
+
+    .pw-strength { display: flex; gap: 4px; margin-top: 0.5rem; }
+    .pw-bar { flex: 1; height: 3px; border-radius: 100px; background: rgba(255,255,255,0.1); }
+    .pw-bar.weak { background: var(--error); }
+    .pw-bar.medium { background: var(--gold); }
+    .pw-bar.strong { background: var(--success); }
+
+    .terms-row { display: flex; align-items: flex-start; gap: 0.7rem; margin: 1.2rem 0; }
+    .terms-check { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid rgba(255,255,255,0.25); cursor: pointer; appearance: none; }
+    .terms-check:checked { background: var(--blue-bright); border-color: var(--blue-bright); }
+
     .btn-submit {
       width: 100%; background: var(--white); color: var(--blue); font-family: 'Outfit', sans-serif;
       font-weight: 800; padding: 1rem; border-radius: 100px; border: none; cursor: pointer;
-      margin-top: 0.8rem;
+      margin-top: 0.8rem; position: relative;
     }
+    .btn-submit:hover { transform: translateY(-2px); }
     .btn-submit.loading { color: transparent; pointer-events: none; }
     .btn-submit.loading::after {
       content: ''; position: absolute; width: 20px; height: 20px;
@@ -110,7 +126,10 @@
       animation: spin 0.7s linear infinite;
     }
 
-    .success-screen { display: none; text-align: center; }
+    .switch-row { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--white-60); }
+    .switch-row button { background: none; border: none; color: var(--gold); font-weight: 700; cursor: pointer; }
+
+    .success-screen { display: none; text-align: center; padding: 1rem 0; }
     .success-screen.show { display: block; }
     .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
 
@@ -158,16 +177,17 @@
               <span class="input-icon">@</span>
               <input class="form-input" type="text" id="signupUsername" placeholder="yourhandle" oninput="validateUsername(this)">
             </div>
-            <p class="field-error" id="usernameError">3–20 characters, letters/numbers/underscores only</p>
+            <p class="username-hint" id="usernameHint">3–20 characters • letters, numbers, underscores only</p>
+            <p class="field-error" id="usernameError">Invalid username format.</p>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label">Email Address</label>
             <div class="form-input-wrap">
               <span class="input-icon">✉</span>
               <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" oninput="validateEmail(this, 'signupEmailError')">
             </div>
-            <p class="field-error" id="signupEmailError">Please enter a valid email</p>
+            <p class="field-error" id="signupEmailError">Please enter a valid email.</p>
           </div>
 
           <div class="form-group">
@@ -177,28 +197,39 @@
               <input class="form-input" type="password" id="signupPassword" placeholder="Min. 8 characters" oninput="checkStrength(this)">
               <button class="input-toggle-pw" onclick="togglePw('signupPassword', this)">Show</button>
             </div>
+            <div class="pw-strength">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+            </div>
+            <p class="pw-label" id="pwLabel">Enter a password</p>
           </div>
 
           <div class="terms-row">
             <input type="checkbox" id="termsCheck">
-            <label>I agree to the Terms & Privacy Policy</label>
+            <label class="terms-text">I agree to the Terms & Privacy Policy</label>
           </div>
 
           <button class="btn-submit" id="signupBtn" onclick="handleSignup()">Create My Account</button>
           <p class="field-error" id="signupGeneralError" style="text-align:center"></p>
+
+          <div class="switch-row">
+            Already have an account? <button onclick="switchTab('login')">Log in</button>
+          </div>
         </div>
 
         <!-- LOGIN FORM -->
         <div id="panelLogin" style="display:none;">
           <h1 class="auth-heading">Welcome back.<br/><em>Own</em> your edge.</h1>
-          <p class="auth-sub">Log in to see your PunterScore.</p>
+          <p class="auth-sub">Log in to see your PunterScore and submit tips.</p>
 
           <div class="form-group">
-            <label class="form-label">Email</label>
+            <label class="form-label">Email Address</label>
             <div class="form-input-wrap">
               <span class="input-icon">✉</span>
-              <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com">
+              <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" oninput="validateEmail(this, 'loginEmailError')">
             </div>
+            <p class="field-error" id="loginEmailError">Please enter a valid email.</p>
           </div>
 
           <div class="form-group">
@@ -208,10 +239,15 @@
               <input class="form-input" type="password" id="loginPassword" placeholder="Your password">
               <button class="input-toggle-pw" onclick="togglePw('loginPassword', this)">Show</button>
             </div>
+            <p class="field-error" id="loginPasswordError">Please enter your password.</p>
           </div>
 
           <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Log In</button>
           <p class="field-error" id="loginGeneralError" style="text-align:center"></p>
+
+          <div class="switch-row">
+            Don't have an account? <button onclick="switchTab('signup')">Sign up free</button>
+          </div>
         </div>
 
       </div>
@@ -246,12 +282,62 @@
       btn.textContent = input.type === 'password' ? 'Show' : 'Hide';
     }
 
+    function validateEmail(input, errorId) {
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
+      document.getElementById(errorId).classList.toggle('show', input.value && !valid);
+      return valid;
+    }
+
+    function validateUsername(input) {
+      const val = input.value.trim();
+      const valid = /^[a-zA-Z0-9_]{3,20}$/.test(val);
+      document.getElementById('usernameError').classList.toggle('show', val && !valid);
+      document.getElementById('usernameHint').style.display = (val && valid) ? 'block' : 'none';
+      return valid;
+    }
+
+    function checkStrength(input) {
+      const val = input.value;
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
+      const label = document.getElementById('pwLabel');
+      bars.forEach(b => b.className = 'pw-bar');
+
+      if (val.length === 0) {
+        label.textContent = 'Enter a password';
+        return;
+      }
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      if (score === 1) {
+        bars[0].classList.add('weak');
+        label.textContent = 'Weak';
+      } else if (score === 2) {
+        bars[0].classList.add('medium'); bars[1].classList.add('medium');
+        label.textContent = 'Good';
+      } else if (score === 3) {
+        bars.forEach(b => b.classList.add('strong'));
+        label.textContent = 'Strong ✓';
+      }
+    }
+
     async function handleSignup() {
       const username = document.getElementById('signupUsername').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
+      const terms = document.getElementById('termsCheck').checked;
       const btn = document.getElementById('signupBtn');
       const err = document.getElementById('signupGeneralError');
+
+      if (!validateUsername(document.getElementById('signupUsername')) || 
+          !validateEmail(document.getElementById('signupEmail'), 'signupEmailError') || 
+          password.length < 8 || !terms) {
+        err.textContent = "Please fix the errors above.";
+        err.classList.add('show');
+        return;
+      }
 
       btn.classList.add('loading');
       err.classList.remove('show');
@@ -280,7 +366,69 @@
       }
     }
 
-    // Add your handleLogin function here if needed
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginGeneralError');
+
+      if (!email || !password) {
+        err.textContent = "Please fill in all fields.";
+        err.classList.add('show');
+        return;
+      }
+
+      btn.classList.add('loading');
+      err.classList.remove('show');
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        localStorage.setItem('ps_user', JSON.stringify({
+          id: data.user.id,
+          username: data.user.user_metadata?.username || email.split('@')[0],
+          email: data.user.email,
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          grade: 'bronze',
+          punter_score: 0
+        }));
+
+        window.location.href = 'https://punterstats.qzz.io/dashboard.html';
+
+      } catch (e) {
+        err.textContent = e.message || "Invalid email or password.";
+        err.classList.add('show');
+      } finally {
+        btn.classList.remove('loading');
+      }
+    }
+
+    // Forgot Password
+    async function handleForgotPassword() {
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!email) {
+        alert("Enter your email first");
+        return;
+      }
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://punterstats.qzz.io/auth.html'
+        });
+        if (error) throw error;
+        alert("Password reset link sent! Check your email.");
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    // Check if user came from email confirmation
+    window.addEventListener('load', () => {
+      if (window.location.hash.includes('access_token')) {
+        window.location.href = 'https://punterstats.qzz.io/confirm.html' + window.location.hash;
+      }
+    });
   </script>
 </body>
 </html>
