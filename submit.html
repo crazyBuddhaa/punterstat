@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — Submit Tip</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --platinum: #E8E8F0;
+      --diamond: #7DF9FF;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --success: #4ade80;
+      --error: #f87171;
+      --sidebar-w: 240px;
+      --bottom-nav-h: 64px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy-card);
+      border-right: 1px solid var(--white-20);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 1.4rem 1.4rem 1.2rem; text-decoration: none; border-bottom: 1px solid var(--white-20); flex-shrink: 0; }
+    .sidebar-logo img { width: 30px; height: 30px; object-fit: contain; }
+    .sidebar-logo span { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--white); letter-spacing: -0.4px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem; }
+    .nav-group-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-30); padding: 0.8rem 0.9rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 0.8rem; border: none; background: transparent; color: var(--white-60); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 0.85rem; width: 100%; transition: background 0.2s, color 0.2s; text-decoration: none; }
+    .nav-item:hover { background: var(--white-10); color: var(--white); }
+    .nav-item.active { background: var(--blue-bright); color: var(--white); }
+    .nav-icon { font-size: 0.95rem; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 100px; }
+    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; }
+    .sidebar-logout:hover { color: var(--error); }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; padding-bottom: var(--bottom-nav-h); }
+
+    /* TOPBAR */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.8rem; border-bottom: 1px solid var(--white-20); background: var(--navy-card); position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 0.8rem; }
+    .topbar-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.3px; }
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--white); font-size: 1.3rem; cursor: pointer; padding: 0.3rem; }
+    .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--diamond)); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; }
+
+    /* CONTENT */
+    .content { padding: 1.6rem 1.8rem; flex: 1; max-width: 720px; }
+
+    /* FORM CARD */
+    .form-card {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.5rem;
+      overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .form-section {
+      padding: 1.5rem 1.8rem;
+      border-bottom: 1px solid var(--white-20);
+    }
+
+    .form-section:last-child { border-bottom: none; }
+
+    .section-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    /* FORM ELEMENTS */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.9rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--white-60);
+    }
+
+    .optional { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--white-30); font-size: 0.68rem; }
+
+    input, select, textarea {
+      background: var(--white-10);
+      border: 1.5px solid var(--white-20);
+      border-radius: 0.8rem;
+      padding: 0.75rem 1rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+    }
+
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.25); }
+    input:focus, select:focus, textarea:focus { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.1); }
+    input.readonly { opacity: 0.6; cursor: default; background: rgba(255,209,102,0.05); border-color: rgba(255,209,102,0.15); }
+    input.highlight { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.04); color: var(--success); }
+
+    select option { background: var(--navy-card); color: var(--white); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* BET TYPE */
+    .bet-type-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .bet-type-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.8rem;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+    }
+
+    .bet-type-btn:hover { border-color: var(--white-30); color: var(--white); }
+    .bet-type-btn.active { background: var(--blue-bright); border-color: var(--blue-bright); color: var(--white); }
+
+    /* SPORT CHIPS */
+    .sport-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    .sport-chip {
+      padding: 0.4rem 0.85rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .sport-chip:hover { border-color: var(--white-30); color: var(--white); }
+    .sport-chip.active { background: var(--blue-bright); border-color: var(--blue-bright); color: var(--white); }
+
+    /* BOOKMAKER SELECTOR */
+    .bookie-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+
+    .bookie-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 0.8rem;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      min-width: 64px;
+    }
+
+    .bookie-btn:hover { border-color: var(--white-30); color: var(--white); }
+    .bookie-btn.active { border-color: var(--gold); background: rgba(255,209,102,0.1); color: var(--gold); }
+
+    .bookie-short {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: inherit;
+    }
+
+    /* BOOKING CODES */
+    .booking-codes { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .booking-code-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 0.8rem;
+      padding: 0.6rem 0.9rem;
+      animation: fadeUp 0.25s ease both;
+    }
+
+    .bookie-tag {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.72rem;
+      color: var(--gold);
+      min-width: 48px;
+      flex-shrink: 0;
+    }
+
+    .booking-code-row input {
+      border: none;
+      background: transparent;
+      padding: 0.2rem 0;
+      font-size: 0.85rem;
+      border-radius: 0;
+    }
+
+    .booking-code-row input:focus { border: none; background: transparent; }
+
+    /* LEGS */
+    .legs-container { display: flex; flex-direction: column; gap: 0.7rem; }
+
+    .leg-card {
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 1rem;
+      padding: 1rem 1.1rem;
+      animation: fadeUp 0.25s ease both;
+    }
+
+    .leg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+
+    .leg-label {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.72rem;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .btn-remove-leg {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--error);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-remove-leg:hover { background: rgba(248,113,113,0.2); }
+
+    .btn-add-leg {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--white-10);
+      border: 1.5px dashed var(--white-20);
+      border-radius: 0.8rem;
+      padding: 0.7rem 1rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--white-60);
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 0.6rem;
+      justify-content: center;
+    }
+
+    .btn-add-leg:hover { background: var(--white-20); color: var(--white); border-color: var(--white-30); }
+
+    /* LOCK NOTICE */
+    .lock-notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: rgba(255,209,102,0.07);
+      border: 1px solid rgba(255,209,102,0.2);
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .lock-notice-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .lock-notice-text { font-size: 0.78rem; color: rgba(255,255,255,0.65); line-height: 1.55; }
+    .lock-notice-text strong { color: var(--gold); }
+
+    /* SUBMIT BTN */
+    .btn-lock {
+      width: 100%;
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 1rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-lock:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,209,102,0.3); }
+    .btn-lock.loading { color: transparent; pointer-events: none; }
+    .btn-lock.loading::after {
+      content: '';
+      position: absolute;
+      width: 22px; height: 22px;
+      border: 2.5px solid rgba(11,19,64,0.3);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* SUCCESS */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .success-screen h2 { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; margin-bottom: 0.6rem; }
+    .success-screen p { font-size: 0.88rem; color: var(--white-60); line-height: 1.65; margin-bottom: 1.5rem; }
+
+    .success-summary {
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 1rem;
+      padding: 1rem 1.2rem;
+      font-size: 0.82rem;
+      line-height: 1.9;
+      text-align: left;
+      margin-bottom: 1.5rem;
+      color: var(--white-60);
+    }
+
+    .success-summary strong { color: var(--white); }
+
+    .btn-another {
+      background: transparent;
+      border: 1.5px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.75rem 1.8rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 0.6rem;
+    }
+
+    .btn-another:hover { background: var(--white-10); border-color: var(--white-30); }
+
+    .btn-view-tips {
+      background: var(--gold);
+      border: none;
+      border-radius: 100px;
+      padding: 0.75rem 1.8rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--navy);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-view-tips:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,209,102,0.3); }
+
+    /* BOTTOM NAV */
+    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-h); background: var(--navy-card); border-top: 1px solid var(--white-20); z-index: 200; align-items: center; justify-content: space-around; padding: 0 0.5rem; }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; font-size: 0.62rem; font-weight: 600; color: var(--white-30); text-decoration: none; background: none; border: none; cursor: pointer; padding: 0.5rem 0.8rem; border-radius: 0.8rem; transition: color 0.2s; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .bottom-nav-item.active { color: var(--white); }
+    .bottom-nav-icon { font-size: 1.2rem; }
+    .nav-submit-btn { background: var(--gold); color: var(--navy) !important; border-radius: 50%; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem !important; padding: 0 !important; margin-top: -12px; box-shadow: 0 4px 16px rgba(255,209,102,0.4); text-decoration: none; }
+
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.4); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .mobile-menu-btn { display: block; }
+      .content { padding: 1rem; }
+      .bottom-nav { display: flex; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-row-3 { grid-template-columns: 1fr 1fr; }
+      .topbar { padding: 0.9rem 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Overview</a>
+      <a class="nav-item active" href="submit.html"><span class="nav-icon">➕</span> Submit Tip <span class="nav-badge">New</span></a>
+      <a class="nav-item" href="tips.html"><span class="nav-icon">📋</span> My Tips</a>
+      <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> Analytics</a>
+      <div class="nav-group-label">Community</div>
+      <a class="nav-item" href="leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a class="nav-item" href="challenges.html"><span class="nav-icon">⚔️</span> Challenges</a>
+      <div class="nav-group-label">Progress</div>
+      <a class="nav-item" href="achievements.html"><span class="nav-icon">🎖️</span> Achievements</a>
+      <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Public Profile</a>
+    </nav>
+    <a href="auth.html" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+        <span class="topbar-title">Submit Tip</span>
+      </div>
+      <div class="topbar-avatar" id="topbarAvatar">P</div>
+    </header>
+
+    <div class="content">
+
+      <!-- SUCCESS SCREEN -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">🔒</div>
+        <h2>Tip Locked In.</h2>
+        <p>Submitted and locked before kickoff. Settled automatically by live data. No edits. No deletions.</p>
+        <div class="success-summary" id="successSummary"></div>
+        <div>
+          <button class="btn-another" onclick="resetForm()">Submit Another</button>
+          <a class="btn-view-tips" href="tips.html">View My Tips →</a>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <div id="submitForm">
+        <div class="form-card">
+
+          <!-- STEP 1: BET TYPE -->
+          <div class="form-section">
+            <div class="section-eyebrow">Step 1</div>
+            <div class="section-title">Bet Type & Sport</div>
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label>Slip Type</label>
+              <div class="bet-type-row">
+                <button class="bet-type-btn active" data-type="single" onclick="setBetType(this)">Single</button>
+                <button class="bet-type-btn" data-type="double" onclick="setBetType(this)">Double</button>
+                <button class="bet-type-btn" data-type="treble" onclick="setBetType(this)">Treble</button>
+                <button class="bet-type-btn" data-type="4fold" onclick="setBetType(this)">4-Fold</button>
+                <button class="bet-type-btn" data-type="5fold" onclick="setBetType(this)">5-Fold</button>
+                <button class="bet-type-btn" data-type="acca" onclick="setBetType(this)">6-Fold+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Sport(s)</label>
+              <div class="sport-chips">
+                <button class="sport-chip active" data-sport="Football" onclick="setSport(this)">⚽ Football</button>
+                <button class="sport-chip" data-sport="Basketball" onclick="setSport(this)">🏀 Basketball</button>
+                <button class="sport-chip" data-sport="Tennis" onclick="setSport(this)">🎾 Tennis</button>
+                <button class="sport-chip" data-sport="Am. Football" onclick="setSport(this)">🏈 Am. Football</button>
+                <button class="sport-chip" data-sport="Cricket" onclick="setSport(this)">🏏 Cricket</button>
+                <button class="sport-chip" data-sport="Boxing/MMA" onclick="setSport(this)">🥊 Boxing/MMA</button>
+                <button class="sport-chip" data-sport="Mixed" onclick="setSport(this)">🎲 Mixed</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: BOOKMAKERS -->
+          <div class="form-section">
+            <div class="section-eyebrow">Step 2</div>
+            <div class="section-title">Bookmakers & Codes</div>
+            <label style="margin-bottom:0.6rem; display:block;">Select bookmakers used for this slip</label>
+            <div class="bookie-grid">
+              <button class="bookie-btn" data-bookie="SportyBet" onclick="toggleBookie(this)">
+                <span class="bookie-short">SB</span>
+                <span>SportyBet</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Bet9ja" onclick="toggleBookie(this)">
+                <span class="bookie-short">B9</span>
+                <span>Bet9ja</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Bet24" onclick="toggleBookie(this)">
+                <span class="bookie-short">B24</span>
+                <span>Bet24</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Stake" onclick="toggleBookie(this)">
+                <span class="bookie-short">STK</span>
+                <span>Stake</span>
+              </button>
+              <button class="bookie-btn" data-bookie="1xBet" onclick="toggleBookie(this)">
+                <span class="bookie-short">1X</span>
+                <span>1xBet</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Betway" onclick="toggleBookie(this)">
+                <span class="bookie-short">BW</span>
+                <span>Betway</span>
+              </button>
+              <button class="bookie-btn" data-bookie="BetKing" onclick="toggleBookie(this)">
+                <span class="bookie-short">BK</span>
+                <span>BetKing</span>
+              </button>
+              <button class="bookie-btn" data-bookie="NairaBet" onclick="toggleBookie(this)">
+                <span class="bookie-short">NB</span>
+                <span>NairaBet</span>
+              </button>
+              <button class="bookie-btn" data-bookie="MSport" onclick="toggleBookie(this)">
+                <span class="bookie-short">MS</span>
+                <span>MSport</span>
+              </button>
+              <button class="bookie-btn" data-bookie="BangBet" onclick="toggleBookie(this)">
+                <span class="bookie-short">BB</span>
+                <span>BangBet</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Football.com" onclick="toggleBookie(this)">
+                <span class="bookie-short">FC</span>
+                <span>Football.com</span>
+              </button>
+              <button class="bookie-btn" data-bookie="MerryBet" onclick="toggleBookie(this)">
+                <span class="bookie-short">MB</span>
+                <span>MerryBet</span>
+              </button>
+              <button class="bookie-btn" data-bookie="Other" onclick="toggleBookie(this)">
+                <span class="bookie-short">+</span>
+                <span>Other</span>
+              </button>
+            </div>
+
+            <!-- BOOKING CODES per bookie -->
+            <div class="booking-codes" id="bookingCodesWrap"></div>
+          </div>
+
+          <!-- STEP 3: SLIP DETAILS -->
+          <div class="form-section">
+            <div class="section-eyebrow">Step 3</div>
+            <div class="section-title">Slip Details</div>
+            <div class="form-row" style="margin-bottom:0.9rem;">
+              <div class="form-group">
+                <label>Total Odds</label>
+                <input type="number" id="totalOdds" placeholder="e.g. 12.50" step="0.01" min="1.01" oninput="calcWinnings()" />
+              </div>
+              <div class="form-group">
+                <label>Stake Amount (₦)</label>
+                <input type="number" id="stakeAmount" placeholder="e.g. 2000" min="1" oninput="calcWinnings()" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Potential Winnings (₦) <span class="optional">auto</span></label>
+                <input type="text" id="potentialWin" placeholder="Auto-calculated" readonly class="readonly highlight" />
+              </div>
+              <div class="form-group">
+                <label>Kickoff Date & Time</label>
+                <input type="datetime-local" id="kickoffTime" />
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: SELECTIONS -->
+          <div class="form-section" id="selectionsSection">
+            <div class="section-eyebrow">Step 4</div>
+            <div class="section-title" id="selectionTitle">Selection</div>
+
+            <!-- SINGLE -->
+            <div id="singleForm">
+              <div class="form-group" style="margin-bottom:0.9rem;">
+                <label>Match / Event</label>
+                <input type="text" id="singleMatch" placeholder="e.g. Man City vs Arsenal" />
+              </div>
+              <div class="form-group">
+                <label>Your Pick</label>
+                <input type="text" id="singlePick" placeholder="e.g. Man City to win / Over 2.5 goals / BTTS" />
+              </div>
+            </div>
+
+            <!-- ACCA LEGS -->
+            <div id="accaForm" style="display:none;">
+              <div class="legs-container" id="legsContainer"></div>
+              <button type="button" class="btn-add-leg" onclick="addLeg()">+ Add Selection</button>
+            </div>
+          </div>
+
+          <!-- STEP 5: ANALYSIS -->
+          <div class="form-section">
+            <div class="section-eyebrow">Step 5</div>
+            <div class="section-title">Analysis <span class="optional">(optional)</span></div>
+            <div class="form-group">
+              <label>Reasoning / Notes <span class="optional">Share your thinking</span></label>
+              <textarea id="analysis" placeholder="Why do you like this slip? Any form, stats or insight..."></textarea>
+            </div>
+
+            <div class="lock-notice" style="margin-top:1.2rem;">
+              <span class="lock-notice-icon">🔒</span>
+              <span class="lock-notice-text">
+                <strong>This tip locks at submission.</strong> No edits or deletions after. The result is settled automatically by live sports data — not by you. This is what makes your record verifiable.
+              </span>
+            </div>
+
+            <button class="btn-lock" id="lockBtn" onclick="handleSubmit()">
+              🔒 Lock In My Tip
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item"><span class="bottom-nav-icon">📊</span><span>Home</span></a>
+    <a href="tips.html" class="bottom-nav-item"><span class="bottom-nav-icon">📋</span><span>My Tips</span></a>
+    <a href="submit.html" class="nav-submit-btn">＋</a>
+    <a href="leaderboard.html" class="bottom-nav-item"><span class="bottom-nav-icon">🏆</span><span>Ranks</span></a>
+    <a href="profile.html" class="bottom-nav-item"><span class="bottom-nav-icon">👤</span><span>Profile</span></a>
+  </nav>
+
+  <script>
+    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+
+    // State
+    let betType = 'single';
+    let sport = 'Football';
+    let selectedBookies = [];
+    let legCount = 0;
+
+    // Leg counts per type
+    const LEG_COUNTS = { single:1, double:2, treble:3, '4fold':4, '5fold':5, acca:6 };
+
+    function getUser() { try { return JSON.parse(localStorage.getItem('ps_user')); } catch { return null; } }
+
+    function logout(e) { e.preventDefault(); localStorage.removeItem('ps_user'); window.location.href = 'auth.html'; }
+
+    async function supaFetch(path, options = {}) {
+      const user = getUser();
+      const token = user?.access_token || SUPABASE_KEY;
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...options.headers },
+        ...options
+      });
+      return res.json();
+    }
+
+    // ── BET TYPE ──
+    function setBetType(btn) {
+      document.querySelectorAll('.bet-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      betType = btn.dataset.type;
+
+      const isAcca = betType !== 'single';
+      document.getElementById('singleForm').style.display = isAcca ? 'none' : 'block';
+      document.getElementById('accaForm').style.display = isAcca ? 'block' : 'none';
+
+      const count = LEG_COUNTS[betType] || 2;
+      document.getElementById('selectionTitle').textContent = isAcca ? `Selections (${count} legs)` : 'Selection';
+
+      if (isAcca) {
+        // Reset and render legs
+        document.getElementById('legsContainer').innerHTML = '';
+        legCount = 0;
+        for (let i = 0; i < count; i++) addLeg();
+      }
+    }
+
+    // ── SPORT ──
+    function setSport(chip) {
+      document.querySelectorAll('.sport-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      sport = chip.dataset.sport;
+    }
+
+    // ── BOOKMAKERS ──
+    function toggleBookie(btn) {
+      const bookie = btn.dataset.bookie;
+      btn.classList.toggle('active');
+
+      if (btn.classList.contains('active')) {
+        selectedBookies.push(bookie);
+      } else {
+        selectedBookies = selectedBookies.filter(b => b !== bookie);
+        const row = document.getElementById('code-' + bookie.replace(/\W/g,''));
+        if (row) row.remove();
+      }
+
+      renderBookingCodes();
+    }
+
+    function renderBookingCodes() {
+      const wrap = document.getElementById('bookingCodesWrap');
+      wrap.innerHTML = '';
+      selectedBookies.forEach(bookie => {
+        const id = 'code-' + bookie.replace(/\W/g,'');
+        const row = document.createElement('div');
+        row.className = 'booking-code-row';
+        row.id = id;
+        row.innerHTML = `
+          <span class="bookie-tag">${bookie}</span>
+          <input type="text" placeholder="Booking code (optional)" data-bookie="${bookie}" style="flex:1;" />
+        `;
+        wrap.appendChild(row);
+      });
+    }
+
+    // ── LEGS ──
+    function addLeg() {
+      legCount++;
+      const container = document.getElementById('legsContainer');
+      const div = document.createElement('div');
+      div.className = 'leg-card';
+      div.id = 'leg-' + legCount;
+      div.innerHTML = `
+        <div class="leg-header">
+          <span class="leg-label">Selection ${legCount}</span>
+          <button class="btn-remove-leg" onclick="removeLeg(${legCount})">✕ Remove</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Match / Event</label>
+            <input class="leg-match" type="text" placeholder="e.g. Arsenal vs Chelsea" />
+          </div>
+          <div class="form-group">
+            <label>Pick</label>
+            <input class="leg-pick" type="text" placeholder="e.g. Arsenal to win" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:0.7rem;">
+          <div class="form-group">
+            <label>Odds</label>
+            <input class="leg-odds" type="number" placeholder="e.g. 1.85" step="0.01" min="1.01" oninput="calcAccaOdds()" />
+          </div>
+          <div class="form-group">
+            <label>Kickoff</label>
+            <input class="leg-kickoff" type="datetime-local" />
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+      updateSelectionTitle();
+    }
+
+    function removeLeg(id) {
+      const el = document.getElementById('leg-' + id);
+      if (el) el.remove();
+      updateSelectionTitle();
+      calcAccaOdds();
+    }
+
+    function updateSelectionTitle() {
+      const count = document.querySelectorAll('.leg-card').length;
+      document.getElementById('selectionTitle').textContent = `Selections (${count} legs)`;
+    }
+
+    function calcAccaOdds() {
+      const inputs = document.querySelectorAll('.leg-odds');
+      let total = 1;
+      inputs.forEach(inp => { const v = parseFloat(inp.value); if (v >= 1.01) total *= v; });
+      if (inputs.length > 0) {
+        document.getElementById('totalOdds').value = total.toFixed(2);
+        calcWinnings();
+      }
+    }
+
+    // ── WINNINGS ──
+    function calcWinnings() {
+      const odds = parseFloat(document.getElementById('totalOdds').value);
+      const stake = parseFloat(document.getElementById('stakeAmount').value);
+      const el = document.getElementById('potentialWin');
+      if (odds >= 1.01 && stake > 0) {
+        el.value = '₦' + (odds * stake).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        el.classList.add('highlight');
+      } else {
+        el.value = '';
+        el.classList.remove('highlight');
+      }
+    }
+
+    // ── SUBMIT ──
+    async function handleSubmit() {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      const odds = parseFloat(document.getElementById('totalOdds').value);
+      const stake = parseFloat(document.getElementById('stakeAmount').value);
+      const kickoff = document.getElementById('kickoffTime').value;
+
+      if (selectedBookies.length === 0) { alert('Please select at least one bookmaker.'); return; }
+      if (!sport) { alert('Please select a sport.'); return; }
+      if (!odds || odds < 1.01) { alert('Please enter valid total odds.'); return; }
+      if (!stake || stake < 1) { alert('Please enter your stake amount.'); return; }
+      if (!kickoff || new Date(kickoff) <= new Date()) { alert('Kickoff must be in the future.'); return; }
+
+      let matchName = '', selection = '';
+
+      if (betType === 'single') {
+        matchName = document.getElementById('singleMatch').value.trim();
+        selection = document.getElementById('singlePick').value.trim();
+        if (!matchName || !selection) { alert('Please fill in the match and pick.'); return; }
+      } else {
+        const legs = document.querySelectorAll('.leg-card');
+        if (legs.length < 2) { alert('Please add at least 2 selections for an accumulator.'); return; }
+        matchName = legs.length + '-leg accumulator';
+        selection = Array.from(legs).map(l => {
+          const m = l.querySelector('.leg-match')?.value || '';
+          const p = l.querySelector('.leg-pick')?.value || '';
+          return `${m}: ${p}`;
+        }).filter(Boolean).join(' | ');
+      }
+
+      // Collect booking codes
+      const bookingCodes = {};
+      document.querySelectorAll('#bookingCodesWrap input').forEach(inp => {
+        if (inp.value.trim()) bookingCodes[inp.dataset.bookie] = inp.value.trim();
+      });
+
+      const btn = document.getElementById('lockBtn');
+      btn.classList.add('loading');
+
+      try {
+        const winnings = odds * stake;
+        const { error } = await supaFetch('/rest/v1/tips', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            user_id: user.id,
+            bet_type: betType,
+            bookmaker: selectedBookies.join(', '),
+            bet_id: Object.values(bookingCodes).join(', ') || null,
+            sport,
+            match_name: matchName,
+            selection,
+            odds,
+            stake,
+            potential_winnings: winnings,
+            legs_count: betType === 'single' ? 1 : document.querySelectorAll('.leg-card').length,
+            status: 'pending',
+            kickoff_time: new Date(kickoff).toISOString(),
+            locked: true
+          })
+        });
+
+        btn.classList.remove('loading');
+
+        // Build summary
+        const codesStr = Object.entries(bookingCodes).map(([b,c]) => `${b}: ${c}`).join(' · ') || 'None provided';
+        document.getElementById('successSummary').innerHTML = `
+          <strong>Bookmakers:</strong> ${selectedBookies.join(', ')}<br/>
+          <strong>Booking Codes:</strong> ${codesStr}<br/>
+          <strong>Type:</strong> ${betType}<br/>
+          <strong>Sport:</strong> ${sport}<br/>
+          <strong>Total Odds:</strong> @${odds}<br/>
+          <strong>Stake:</strong> ₦${stake.toLocaleString()}<br/>
+          <strong>Potential Win:</strong> ₦${winnings.toLocaleString()}
+        `;
+
+        document.getElementById('submitForm').style.display = 'none';
+        document.getElementById('successScreen').classList.add('show');
+
+      } catch (err) {
+        btn.classList.remove('loading');
+        alert('Error saving tip: ' + err.message);
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('submitForm').style.display = 'block';
+      document.getElementById('successScreen').classList.remove('show');
+      document.querySelectorAll('.bet-type-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-type="single"]').classList.add('active');
+      document.querySelectorAll('.sport-chip').forEach(c => c.classList.remove('active'));
+      document.querySelector('[data-sport="Football"]').classList.add('active');
+      document.querySelectorAll('.bookie-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('bookingCodesWrap').innerHTML = '';
+      document.getElementById('totalOdds').value = '';
+      document.getElementById('stakeAmount').value = '';
+      document.getElementById('potentialWin').value = '';
+      document.getElementById('kickoffTime').value = '';
+      document.getElementById('singleMatch').value = '';
+      document.getElementById('singlePick').value = '';
+      document.getElementById('analysis').value = '';
+      document.getElementById('legsContainer').innerHTML = '';
+      document.getElementById('singleForm').style.display = 'block';
+      document.getElementById('accaForm').style.display = 'none';
+      betType = 'single';
+      sport = 'Football';
+      selectedBookies = [];
+      legCount = 0;
+    }
+
+    function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+    window.addEventListener('load', () => {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+      document.getElementById('topbarAvatar').textContent = user.username.slice(0,2).toUpperCase();
+    });
+  </script>
+</body>
+</html>
