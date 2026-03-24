@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — My Tips</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --platinum: #E8E8F0;
+      --diamond: #7DF9FF;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --success: #4ade80;
+      --error: #f87171;
+      --sidebar-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--navy-card); border-right: 1px solid var(--white-20); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s ease; overflow-y: auto; }
+    .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 1.4rem 1.4rem 1.2rem; text-decoration: none; border-bottom: 1px solid var(--white-20); flex-shrink: 0; }
+    .sidebar-logo img { width: 30px; height: 30px; object-fit: contain; }
+    .sidebar-logo span { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--white); letter-spacing: -0.4px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem; }
+    .nav-group-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-30); padding: 0.8rem 0.9rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 0.8rem; border: none; background: transparent; color: var(--white-60); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 0.85rem; width: 100%; transition: background 0.2s, color 0.2s; text-decoration: none; }
+    .nav-item:hover { background: var(--white-10); color: var(--white); }
+    .nav-item.active { background: var(--blue-bright); color: var(--white); }
+    .nav-icon { font-size: 0.95rem; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 100px; }
+    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; }
+    .sidebar-logout:hover { color: var(--error); }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.8rem; border-bottom: 1px solid var(--white-20); background: var(--navy-card); position: sticky; top: 0; z-index: 50; gap: 0.8rem; }
+    .topbar-left { display: flex; align-items: center; gap: 0.8rem; }
+    .topbar-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.3px; }
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--white); font-size: 1.3rem; cursor: pointer; padding: 0.3rem; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--diamond)); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0; }
+
+    .btn-new-tip { background: var(--gold); color: var(--navy); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.78rem; padding: 0.5rem 1.1rem; border-radius: 100px; border: none; cursor: pointer; transition: transform 0.2s; text-decoration: none; white-space: nowrap; }
+    .btn-new-tip:hover { transform: translateY(-1px); }
+
+    /* CONTENT */
+    .content { padding: 1.6rem 1.8rem; flex: 1; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .stat-pill {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 100px;
+      padding: 0.55rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--white-60);
+    }
+
+    .stat-pill strong { color: var(--white); font-family: 'Outfit', sans-serif; font-weight: 800; }
+    .stat-pill.won strong { color: var(--success); }
+    .stat-pill.lost strong { color: var(--error); }
+    .stat-pill.pending strong { color: var(--gold); }
+
+    /* FILTER BAR */
+    .filter-bar {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.1rem;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.4s 0.05s ease both;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+
+    .search-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: 0.9rem; opacity: 0.4; pointer-events: none; }
+
+    .search-input {
+      width: 100%;
+      background: var(--white-10);
+      border: 1.5px solid var(--white-20);
+      border-radius: 0.7rem;
+      padding: 0.6rem 1rem 0.6rem 2.4rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input::placeholder { color: rgba(255,255,255,0.25); }
+    .search-input:focus { border-color: rgba(255,255,255,0.3); }
+
+    .filter-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    .chip {
+      padding: 0.4rem 0.85rem;
+      border-radius: 100px;
+      border: 1.5px solid var(--white-20);
+      background: var(--white-10);
+      color: var(--white-60);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .chip:hover { border-color: var(--white-30); color: var(--white); }
+    .chip.active { background: var(--blue-bright); border-color: var(--blue-bright); color: var(--white); }
+    .chip.won.active { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.4); color: var(--success); }
+    .chip.lost.active { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--error); }
+    .chip.pending.active { background: rgba(255,209,102,0.12); border-color: rgba(255,209,102,0.3); color: var(--gold); }
+
+    .sort-select {
+      background: var(--white-10);
+      border: 1.5px solid var(--white-20);
+      border-radius: 0.7rem;
+      padding: 0.6rem 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--white);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sort-select option { background: var(--navy-card); }
+
+    /* TIPS LIST */
+    .tips-list { display: flex; flex-direction: column; gap: 0.7rem; animation: fadeUp 0.4s 0.1s ease both; }
+
+    .tip-card {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.1rem;
+      padding: 1.1rem 1.3rem;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .tip-card:hover { border-color: rgba(255,255,255,0.2); transform: translateX(3px); }
+    .tip-card.won { border-left: 3px solid var(--success); }
+    .tip-card.lost { border-left: 3px solid var(--error); }
+    .tip-card.pending { border-left: 3px solid var(--gold); }
+    .tip-card.void { border-left: 3px solid rgba(255,255,255,0.2); }
+
+    .tip-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .tip-sport-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+    .tip-main { flex: 1; min-width: 120px; }
+    .tip-match { font-weight: 700; font-size: 0.9rem; }
+    .tip-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; flex-wrap: wrap; }
+    .tip-bookie { font-size: 0.72rem; color: var(--white-60); font-weight: 600; }
+    .tip-type { font-size: 0.68rem; background: var(--white-10); border: 1px solid var(--white-20); border-radius: 100px; padding: 0.1rem 0.5rem; color: var(--white-60); font-weight: 600; }
+
+    .tip-right { display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; flex-wrap: wrap; }
+
+    .tip-odds { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; color: var(--white-60); }
+
+    .tip-status-badge { font-size: 0.68rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 100px; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0; }
+    .badge-won { background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.25); }
+    .badge-lost { background: rgba(248,113,113,0.12); color: var(--error); border: 1px solid rgba(248,113,113,0.25); }
+    .badge-pending { background: rgba(255,209,102,0.12); color: var(--gold); border: 1px solid rgba(255,209,102,0.25); }
+    .badge-void { background: var(--white-10); color: var(--white-60); border: 1px solid var(--white-20); }
+
+    .tip-pnl { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem; flex-shrink: 0; min-width: 55px; text-align: right; }
+    .pnl-pos { color: var(--success); }
+    .pnl-neg { color: var(--error); }
+    .pnl-neutral { color: var(--white-30); }
+
+    /* TIP DETAIL (expandable) */
+    .tip-detail {
+      display: none;
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--white-20);
+      animation: fadeUp 0.2s ease both;
+    }
+
+    .tip-detail.open { display: block; }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.3rem 0;
+      font-size: 0.8rem;
+      border-bottom: 1px solid var(--white-10);
+      gap: 1rem;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--white-60); flex-shrink: 0; }
+    .detail-val { font-weight: 600; text-align: right; word-break: break-all; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 4rem 1rem; color: var(--white-60); }
+    .empty-icon { font-size: 2.8rem; margin-bottom: 0.8rem; }
+    .empty-state h3 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--white); margin-bottom: 0.4rem; }
+    .empty-state p { font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .btn-empty { display: inline-block; background: var(--gold); color: var(--navy); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem; padding: 0.75rem 1.8rem; border-radius: 100px; text-decoration: none; transition: transform 0.2s; }
+    .btn-empty:hover { transform: translateY(-2px); }
+
+    /* LOADING */
+    .loading-state { text-align: center; padding: 3rem; color: var(--white-30); font-size: 0.85rem; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--white-20); border-top-color: var(--white-60); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
+
+    /* PAGINATION */
+    .pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem; flex-wrap: wrap; gap: 0.8rem; }
+    .page-info { font-size: 0.78rem; color: var(--white-60); }
+    .page-btns { display: flex; gap: 0.5rem; }
+    .page-btn { background: var(--white-10); border: 1px solid var(--white-20); border-radius: 0.6rem; padding: 0.45rem 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--white-60); cursor: pointer; transition: all 0.2s; }
+    .page-btn:hover { background: var(--white-20); color: var(--white); }
+    .page-btn.active { background: var(--blue-bright); border-color: var(--blue-bright); color: var(--white); }
+    .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* OVERLAY */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.4); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .mobile-menu-btn { display: block; }
+      .content { padding: 1rem; }
+      .topbar { padding: 0.9rem 1.1rem; }
+      .tip-right { gap: 0.5rem; }
+      .tip-pnl { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Overview</a>
+      <a class="nav-item" href="submit.html"><span class="nav-icon">➕</span> Submit Tip <span class="nav-badge">New</span></a>
+      <a class="nav-item active" href="tips.html"><span class="nav-icon">📋</span> My Tips</a>
+      <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> Analytics</a>
+      <div class="nav-group-label">Community</div>
+      <a class="nav-item" href="leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a class="nav-item" href="challenges.html"><span class="nav-icon">⚔️</span> Challenges</a>
+      <div class="nav-group-label">Progress</div>
+      <a class="nav-item" href="achievements.html"><span class="nav-icon">🎖️</span> Achievements</a>
+      <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Public Profile</a>
+    </nav>
+    <a href="auth.html" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+        <span class="topbar-title">My Tips</span>
+      </div>
+      <div class="topbar-right">
+        <a class="btn-new-tip" href="submit.html">+ Submit Tip</a>
+        <div class="topbar-avatar" id="topbarAvatar">P</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-pill"><span>📝</span> Total: <strong id="countAll">—</strong></div>
+        <div class="stat-pill won"><span>✅</span> Won: <strong id="countWon">—</strong></div>
+        <div class="stat-pill lost"><span>❌</span> Lost: <strong id="countLost">—</strong></div>
+        <div class="stat-pill pending"><span>⏳</span> Pending: <strong id="countPending">—</strong></div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" id="searchInput" placeholder="Search match, bookie, sport..." oninput="applyFilters()" />
+        </div>
+        <div class="filter-chips">
+          <button class="chip active" data-status="all" onclick="setFilter(this)">All</button>
+          <button class="chip won" data-status="won" onclick="setFilter(this)">Won</button>
+          <button class="chip lost" data-status="lost" onclick="setFilter(this)">Lost</button>
+          <button class="chip pending" data-status="pending" onclick="setFilter(this)">Pending</button>
+          <button class="chip" data-status="void" onclick="setFilter(this)">Void</button>
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="odds_high">Highest odds</option>
+          <option value="odds_low">Lowest odds</option>
+          <option value="stake_high">Highest stake</option>
+        </select>
+      </div>
+
+      <!-- TIPS LIST -->
+      <div id="tipsList">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          Loading your tips...
+        </div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination" id="pagination" style="display:none;">
+        <span class="page-info" id="pageInfo"></span>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+    const PAGE_SIZE = 15;
+
+    let allTips = [];
+    let filteredTips = [];
+    let currentFilter = 'all';
+    let currentPage = 1;
+
+    const SPORT_EMOJI = { Football:'⚽', Basketball:'🏀', Tennis:'🎾', 'Am. Football':'🏈', Cricket:'🏏', 'Ice Hockey':'🏒', 'Boxing/MMA':'🥊', Mixed:'🎲' };
+
+    function getUser() { try { return JSON.parse(localStorage.getItem('ps_user')); } catch { return null; } }
+    function logout(e) { e.preventDefault(); localStorage.removeItem('ps_user'); window.location.href = 'auth.html'; }
+    function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    async function supaFetch(path) {
+      const user = getUser();
+      const token = user?.access_token || SUPABASE_KEY;
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      return res.json();
+    }
+
+    async function loadTips() {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      document.getElementById('topbarAvatar').textContent = user.username.slice(0,2).toUpperCase();
+
+      try {
+        const tips = await supaFetch(`/rest/v1/tips?user_id=eq.${user.id}&order=submitted_at.desc&select=*`);
+        allTips = Array.isArray(tips) ? tips : [];
+
+        // Stats bar
+        document.getElementById('countAll').textContent = allTips.length;
+        document.getElementById('countWon').textContent = allTips.filter(t => t.status === 'won').length;
+        document.getElementById('countLost').textContent = allTips.filter(t => t.status === 'lost').length;
+        document.getElementById('countPending').textContent = allTips.filter(t => t.status === 'pending').length;
+
+        applyFilters();
+
+      } catch(e) {
+        document.getElementById('tipsList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Failed to load tips</h3><p>Please refresh the page or try again later.</p></div>`;
+      }
+    }
+
+    function setFilter(btn) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.status;
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const sort = document.getElementById('sortSelect').value;
+
+      filteredTips = allTips.filter(t => {
+        const matchStatus = currentFilter === 'all' || t.status === currentFilter;
+        const matchSearch = !search ||
+          (t.match_name || '').toLowerCase().includes(search) ||
+          (t.bookmaker || '').toLowerCase().includes(search) ||
+          (t.sport || '').toLowerCase().includes(search) ||
+          (t.selection || '').toLowerCase().includes(search) ||
+          (t.bet_id || '').toLowerCase().includes(search);
+        return matchStatus && matchSearch;
+      });
+
+      // Sort
+      filteredTips.sort((a, b) => {
+        if (sort === 'newest') return new Date(b.submitted_at) - new Date(a.submitted_at);
+        if (sort === 'oldest') return new Date(a.submitted_at) - new Date(b.submitted_at);
+        if (sort === 'odds_high') return b.odds - a.odds;
+        if (sort === 'odds_low') return a.odds - b.odds;
+        if (sort === 'stake_high') return b.stake - a.stake;
+        return 0;
+      });
+
+      currentPage = 1;
+      renderTips();
+    }
+
+    function renderTips() {
+      const list = document.getElementById('tipsList');
+
+      if (filteredTips.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>${currentFilter === 'all' ? 'No tips yet' : 'No ' + currentFilter + ' tips'}</h3>
+            <p>${currentFilter === 'all' ? 'Submit your first tip to start building your verified record.' : 'Try a different filter.'}</p>
+            ${currentFilter === 'all' ? '<a class="btn-empty" href="submit.html">Submit Your First Tip →</a>' : ''}
+          </div>`;
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageTips = filteredTips.slice(start, start + PAGE_SIZE);
+
+      list.innerHTML = pageTips.map((t, i) => {
+        const emoji = SPORT_EMOJI[t.sport] || '🎯';
+        const date = new Date(t.submitted_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        const time = new Date(t.submitted_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+        const statusClass = { won:'badge-won', lost:'badge-lost', pending:'badge-pending', void:'badge-void' }[t.status] || 'badge-pending';
+        const cardClass = t.status || 'pending';
+
+        let pnl = '<span class="pnl-neutral">—</span>';
+        if (t.status === 'won') pnl = `<span class="pnl-pos">+₦${((t.potential_winnings || 0) - (t.stake || 0)).toLocaleString()}</span>`;
+        if (t.status === 'lost') pnl = `<span class="pnl-neg">-₦${(t.stake || 0).toLocaleString()}</span>`;
+
+        return `
+          <div class="tip-card ${cardClass}" onclick="toggleDetail(this)">
+            <div class="tip-card-top">
+              <span class="tip-sport-icon">${emoji}</span>
+              <div class="tip-main">
+                <div class="tip-match">${t.match_name || t.bet_type || 'Tip'}</div>
+                <div class="tip-meta">
+                  <span class="tip-bookie">${t.bookmaker || '—'}</span>
+                  <span class="tip-type">${cap(t.bet_type)}</span>
+                  ${t.legs_count > 1 ? `<span class="tip-type">${t.legs_count}-leg</span>` : ''}
+                </div>
+              </div>
+              <div class="tip-right">
+                <span class="tip-odds">@${t.odds}</span>
+                <span class="tip-status-badge ${statusClass}">${cap(t.status)}</span>
+                <span class="tip-pnl">${pnl}</span>
+              </div>
+            </div>
+            <div class="tip-detail">
+              ${t.selection ? `<div class="detail-row"><span class="detail-label">Selection</span><span class="detail-val">${t.selection}</span></div>` : ''}
+              <div class="detail-row"><span class="detail-label">Sport</span><span class="detail-val">${t.sport || '—'}</span></div>
+              <div class="detail-row"><span class="detail-label">Odds</span><span class="detail-val">@${t.odds}</span></div>
+              <div class="detail-row"><span class="detail-label">Stake</span><span class="detail-val">₦${(t.stake || 0).toLocaleString()}</span></div>
+              <div class="detail-row"><span class="detail-label">Potential Win</span><span class="detail-val">₦${(t.potential_winnings || 0).toLocaleString()}</span></div>
+              ${t.bet_id ? `<div class="detail-row"><span class="detail-label">Booking Code</span><span class="detail-val">${t.bet_id}</span></div>` : ''}
+              <div class="detail-row"><span class="detail-label">Submitted</span><span class="detail-val">${date} at ${time}</span></div>
+              ${t.kickoff_time ? `<div class="detail-row"><span class="detail-label">Kickoff</span><span class="detail-val">${new Date(t.kickoff_time).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</span></div>` : ''}
+              ${t.settled_at ? `<div class="detail-row"><span class="detail-label">Settled</span><span class="detail-val">${new Date(t.settled_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</span></div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      renderPagination();
+    }
+
+    function toggleDetail(card) {
+      const detail = card.querySelector('.tip-detail');
+      const isOpen = detail.classList.contains('open');
+      // Close all others
+      document.querySelectorAll('.tip-detail.open').forEach(d => d.classList.remove('open'));
+      if (!isOpen) detail.classList.add('open');
+    }
+
+    function renderPagination() {
+      const total = filteredTips.length;
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      const pag = document.getElementById('pagination');
+      const info = document.getElementById('pageInfo');
+      const btns = document.getElementById('pageBtns');
+
+      if (totalPages <= 1) { pag.style.display = 'none'; return; }
+
+      pag.style.display = 'flex';
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end = Math.min(currentPage * PAGE_SIZE, total);
+      info.textContent = `Showing ${start}–${end} of ${total} tips`;
+
+      btns.innerHTML = `
+        <button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+        ${Array.from({length: totalPages}, (_, i) => `
+          <button class="page-btn ${i + 1 === currentPage ? 'active' : ''}" onclick="goPage(${i + 1})">${i + 1}</button>
+        `).join('')}
+        <button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>
+      `;
+    }
+
+    function goPage(page) {
+      const totalPages = Math.ceil(filteredTips.length / PAGE_SIZE);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderTips();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+    window.addEventListener('load', loadTips);
+  </script>
+</body>
+</html>
