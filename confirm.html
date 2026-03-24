@@ -174,7 +174,7 @@
 
   <div class="card">
     <a href="index.html" class="logo">
-      <img src="assets/logo.png" alt="PunterStat." />
+      <img src="assets/logo.png" alt="PunterStat." onerror="this.style.display='none'" />
       <span>PunterStat.</span>
     </a>
 
@@ -216,9 +216,15 @@
     </div>
   </div>
 
+  <!-- Load Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <script>
     const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+
+    // Initialize Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function showState(id) {
       document.querySelectorAll('.state').forEach(s => s.classList.remove('show'));
@@ -227,144 +233,133 @@
 
     async function handleConfirmation() {
       // Check if already logged in
-      const existingSession = localStorage.getItem('ps_user');
-      if (existingSession) {
+      const existing = localStorage.getItem('ps_user');
+      if (existing) {
         window.location.href = 'dashboard.html';
         return;
       }
 
-      // Get tokens from URL hash (#access_token=...)
+      // Get tokens from URL hash
       const hash = window.location.hash;
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(hash.substring(1));
       
-      let accessToken = null;
-      let refreshToken = null;
-      let type = null;
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const type = params.get('type');
 
-      if (hash && hash.includes('access_token')) {
-        const hashParams = new URLSearchParams(hash.substring(1));
-        accessToken = hashParams.get('access_token');
-        refreshToken = hashParams.get('refresh_token');
-        type = hashParams.get('type');
-      }
-
-      // Check for error params in query string
-      if (params.get('error')) {
+      // Check for error in query params (Supabase sometimes puts errors there)
+      const queryParams = new URLSearchParams(window.location.search);
+      if (queryParams.get('error')) {
         showState('stateError');
         document.getElementById('errorMsg').textContent = 
-          params.get('error_description') || 'Link expired or invalid. Please request a new one.';
+          queryParams.get('error_description') || 'Link expired or invalid.';
         return;
       }
 
       if (!accessToken) {
         showState('stateError');
         document.getElementById('errorMsg').textContent = 
-          'No confirmation token found. Please use the link from your email or sign up again.';
+          'No confirmation token found. Please use the link from your email.';
         return;
       }
 
       try {
-        // Verify the token and get user info
-        const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${accessToken}`
-          }
+        // CRITICAL: Exchange the token for a session using Supabase
+        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
         });
 
-        const userData = await userRes.json();
+        if (sessionError) throw sessionError;
 
-        if (!userRes.ok || !userData.id) {
-          throw new Error(userData.msg || 'Invalid or expired token.');
+        if (!sessionData.session || !sessionData.user) {
+          throw new Error('Failed to establish session');
         }
 
-        // Check if already confirmed (user has logged in before)
-        if (userData.email_confirmed_at && userData.last_sign_in_at) {
+        const user = sessionData.user;
+
+        // Check if user has already signed in before (already confirmed)
+        if (user.last_sign_in_at && user.email_confirmed_at) {
           showState('stateAlready');
           return;
         }
 
-        // Fetch user profile from database (created by trigger)
-        const profileRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/users?id=eq.${userData.id}&select=*`, 
-          {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        );
+        // Fetch or create user profile
+        let { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-        const profiles = await profileRes.json();
-        let profile = profiles && profiles[0];
-
-        // If no profile found (rare edge case), create one now
-        if (!profile) {
-          const username = userData.user_metadata?.username || userData.email.split('@')[0];
+        // If no profile, create one
+        if (!profile || profileError) {
+          const username = user.user_metadata?.username || user.email.split('@')[0];
           
-          const createRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              id: userData.id,
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: user.id,
               username: username,
-              email: userData.email,
+              email: user.email,
               grade: 'ungraded',
-              punter_score: 0
+              punter_score: 0,
+              total_tips: 0,
+              settled_tips: 0
             })
-          });
-          
-          if (createRes.ok) {
-            const newProfiles = await createRes.json();
-            profile = newProfiles[0];
-          } else {
-            console.warn('Profile creation failed, using defaults');
+            .select()
+            .single();
+
+          if (createError) {
+            console.warn('Profile creation failed:', createError);
             profile = { username, grade: 'ungraded', punter_score: 0 };
+          } else {
+            profile = newProfile;
           }
         }
 
-        // Save session to localStorage
+        // Save to localStorage
         localStorage.setItem('ps_user', JSON.stringify({
-          id: userData.id,
-          username: profile.username,
-          email: userData.email,
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          grade: profile.grade || 'ungraded',
-          punter_score: profile.punter_score || 0,
-          confirmed_at: userData.email_confirmed_at
+          id: user.id,
+          username: profile?.username || user.email.split('@')[0],
+          email: user.email,
+          access_token: sessionData.session.access_token,
+          refresh_token: sessionData.session.refresh_token,
+          grade: profile?.grade || 'ungraded',
+          punter_score: profile?.punter_score || 0
         }));
 
-        // Clean URL (remove tokens from browser history)
+        // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
 
         // Show success
         showState('stateSuccess');
 
-        // Auto redirect after 3 seconds
+        // Auto redirect
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 3000);
+        }, 2500);
 
       } catch (err) {
         console.error('Confirmation error:', err);
         showState('stateError');
-        
-        if (err.message.includes('JWT') || err.message.includes('expired')) {
+
+        // Handle specific errors
+        if (err.message?.includes('JWT') || 
+            err.message?.includes('expired') || 
+            err.message?.includes('token is expired')) {
           document.getElementById('errorMsg').textContent = 
-            'This link has expired (valid for 60 minutes). Please sign up again to get a new link.';
+            'This link has expired (valid for 60 minutes). Please sign up again.';
+        } else if (err.message?.includes('User not found')) {
+          document.getElementById('errorMsg').textContent = 
+            'User not found. Please sign up again.';
         } else {
-          document.getElementById('errorMsg').textContent = err.message;
+          document.getElementById('errorMsg').textContent = 
+            err.message || 'Something went wrong. Please try again.';
         }
       }
     }
 
-    // Run on page load
+    // Run immediately
     handleConfirmation();
   </script>
 </body>
