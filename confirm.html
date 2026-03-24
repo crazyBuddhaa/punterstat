@@ -216,7 +216,7 @@
     </div>
   </div>
 
-  <!-- Load Supabase JS -->
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script>
@@ -245,9 +245,8 @@
       
       const accessToken = params.get('access_token');
       const refreshToken = params.get('refresh_token');
-      const type = params.get('type');
 
-      // Check for error in query params (Supabase sometimes puts errors there)
+      // Check for error in query params
       const queryParams = new URLSearchParams(window.location.search);
       if (queryParams.get('error')) {
         showState('stateError');
@@ -264,22 +263,23 @@
       }
 
       try {
-        // CRITICAL: Exchange the token for a session using Supabase
+        // Exchange the token for a session using Supabase
         const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken
         });
 
         if (sessionError) throw sessionError;
-
-        if (!sessionData.session || !sessionData.user) {
-          throw new Error('Failed to establish session');
-        }
+        if (!sessionData.session) throw new Error('Failed to establish session');
 
         const user = sessionData.user;
 
-        // Check if user has already signed in before (already confirmed)
-        if (user.last_sign_in_at && user.email_confirmed_at) {
+        // Check if they just confirmed (email_confirmed_at within last 10 minutes)
+        const justConfirmed = user.email_confirmed_at && 
+          (new Date() - new Date(user.email_confirmed_at)) < 10 * 60 * 1000;
+
+        // If already has session and not just confirmed, show already confirmed
+        if (user.last_sign_in_at && !justConfirmed) {
           showState('stateAlready');
           return;
         }
@@ -337,7 +337,7 @@
         // Auto redirect
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 2500);
+        }, 2000);
 
       } catch (err) {
         console.error('Confirmation error:', err);
@@ -346,7 +346,8 @@
         // Handle specific errors
         if (err.message?.includes('JWT') || 
             err.message?.includes('expired') || 
-            err.message?.includes('token is expired')) {
+            err.message?.includes('token is expired') ||
+            err.message?.includes('Invalid token')) {
           document.getElementById('errorMsg').textContent = 
             'This link has expired (valid for 60 minutes). Please sign up again.';
         } else if (err.message?.includes('User not found')) {
