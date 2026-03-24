@@ -51,7 +51,7 @@
     .nav-item.active { background: var(--blue-bright); color: var(--white); }
     .nav-icon { font-size: 0.95rem; flex-shrink: 0; }
     .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 100px; }
-    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; }
+    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; cursor: pointer; }
     .sidebar-logout:hover { color: var(--error); }
 
     /* MAIN */
@@ -96,7 +96,7 @@
     .hero-left { position: relative; z-index: 2; flex: 1; min-width: 250px; }
     .hero-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
     .live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
-    
+
     .hero-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(2rem, 5vw, 2.6rem); letter-spacing: -1px; line-height: 1.1; margin-bottom: 0.5rem; }
     .hero-sub { font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.6; max-width: 440px; }
 
@@ -143,10 +143,7 @@
     }
 
     .chal-card:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
-    
-    .chal-card.featured {
-      border-color: rgba(255,209,102,0.3);
-    }
+    .chal-card.featured { border-color: rgba(255,209,102,0.3); }
 
     .chal-header {
       padding: 1.2rem 1.5rem;
@@ -180,7 +177,6 @@
       gap: 2rem;
     }
 
-    .chal-info {}
     .chal-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: -0.3px; }
     .chal-desc { font-size: 0.85rem; color: var(--white-60); line-height: 1.6; margin-bottom: 1.2rem; }
 
@@ -271,7 +267,7 @@
       <a class="nav-item" href="achievements.html"><span class="nav-icon">🎖️</span> Achievements</a>
       <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Public Profile</a>
     </nav>
-    <a href="auth.html" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
+    <a href="#" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
   </aside>
 
   <div class="main">
@@ -287,7 +283,7 @@
 
       <div class="arena-hero">
         <div class="hero-left">
-          <div class="hero-eyebrow"><span class="live-dot"></span> Compete & Earn</div>
+          <div class="hero-eyebrow"><span class="live-dot"></span> Compete &amp; Earn</div>
           <h1 class="hero-title">Prove Your Edge</h1>
           <p class="hero-sub">Enter verified tournaments against other punters. Highest ROI or longest streaks win exclusive badges and profile boosts.</p>
         </div>
@@ -300,26 +296,25 @@
       </div>
 
       <div class="challenges-container" id="chalContainer">
-        
+
+        <!-- FEATURED: EPL Master -->
         <div class="chal-card featured" data-status="active">
           <div class="chal-header featured-header">
             <div class="chal-tags">
               <span class="chal-tag tag-live">● Live</span>
               <span class="chal-tag tag-sport">⚽ Football</span>
             </div>
-            <div class="chal-timer">Ends in: <span>2d 14h 30m</span></div>
+            <div class="chal-timer">Ends in: <span class="countdown" data-ends="2026-03-26T23:59:00Z"></span></div>
           </div>
           <div class="chal-body">
             <div class="chal-info">
               <h2 class="chal-title">Weekend Premier League Master</h2>
               <p class="chal-desc">The ultimate test of English football knowledge. Rank is determined by the highest total ROI on English Premier League matches played this weekend.</p>
-              
               <div class="chal-rules">
                 <div class="rule-item"><i>✓</i> Minimum 5 settled tips required.</div>
                 <div class="rule-item"><i>✓</i> Minimum odds of 1.50 per tip.</div>
                 <div class="rule-item"><i>✓</i> Only Pre-Match EPL games qualify.</div>
               </div>
-
               <div class="chal-reward">
                 <div class="reward-icon">🏆</div>
                 <div class="reward-text">
@@ -328,28 +323,15 @@
                 </div>
               </div>
             </div>
-
             <div class="chal-lb-widget">
               <div class="widget-header">Current Top 3 <span>241 Entered</span></div>
               <div class="mini-lb">
-                <div class="mini-lb-row">
-                  <span class="m-rank top">1</span>
-                  <span class="m-user">@SharpPunter</span>
-                  <span class="m-score">+42.5%</span>
-                </div>
-                <div class="mini-lb-row">
-                  <span class="m-rank top">2</span>
-                  <span class="m-user">@CallItRight</span>
-                  <span class="m-score">+38.1%</span>
-                </div>
-                <div class="mini-lb-row">
-                  <span class="m-rank top">3</span>
-                  <span class="m-user">@OddsScout</span>
-                  <span class="m-score">+31.0%</span>
-                </div>
-                <div class="mini-lb-row" style="margin-top:auto; padding-top:0.8rem; border-top: 1px dashed rgba(255,255,255,0.1); border-bottom:none;">
+                <div class="mini-lb-row"><span class="m-rank top">1</span><span class="m-user">@SharpPunter</span><span class="m-score">+42.5%</span></div>
+                <div class="mini-lb-row"><span class="m-rank top">2</span><span class="m-user">@CallItRight</span><span class="m-score">+38.1%</span></div>
+                <div class="mini-lb-row"><span class="m-rank top">3</span><span class="m-user">@OddsScout</span><span class="m-score">+31.0%</span></div>
+                <div class="mini-lb-row" style="margin-top:auto;padding-top:0.8rem;border-top:1px dashed rgba(255,255,255,0.1);border-bottom:none;">
                   <span class="m-rank">14</span>
-                  <span class="m-user" style="color:var(--gold);">@You</span>
+                  <span class="m-user" style="color:var(--gold);" id="epl-you-name">@You</span>
                   <span class="m-score" style="color:var(--white);">-4.2%</span>
                 </div>
               </div>
@@ -360,13 +342,14 @@
           </div>
         </div>
 
+        <!-- NBA Underdog Hunter -->
         <div class="chal-card" data-status="active">
           <div class="chal-header">
             <div class="chal-tags">
               <span class="chal-tag tag-live">● Live</span>
               <span class="chal-tag tag-sport">🏀 Basketball</span>
             </div>
-            <div class="chal-timer">Ends in: <span>5d 08h 15m</span></div>
+            <div class="chal-timer">Ends in: <span class="countdown" data-ends="2026-03-29T23:59:00Z"></span></div>
           </div>
           <div class="chal-body">
             <div class="chal-info">
@@ -387,14 +370,8 @@
             <div class="chal-lb-widget">
               <div class="widget-header">Current Leader <span>89 Entered</span></div>
               <div class="mini-lb">
-                <div class="mini-lb-row">
-                  <span class="m-rank top">1</span>
-                  <span class="m-user">@CourtVision</span>
-                  <span class="m-score">3 Wins</span>
-                </div>
-                <div style="text-align:center; margin-top:1.5rem; font-size:0.75rem; color:var(--white-60);">
-                  You haven't joined this challenge yet.
-                </div>
+                <div class="mini-lb-row"><span class="m-rank top">1</span><span class="m-user">@CourtVision</span><span class="m-score">3 Wins</span></div>
+                <div style="text-align:center;margin-top:1.5rem;font-size:0.75rem;color:var(--white-60);">You haven't joined this challenge yet.</div>
               </div>
               <div class="chal-actions">
                 <button class="btn-join">Join Challenge</button>
@@ -403,6 +380,7 @@
           </div>
         </div>
 
+        <!-- Grand Slam (Upcoming) -->
         <div class="chal-card" data-status="upcoming" style="display:none;">
           <div class="chal-header">
             <div class="chal-tags">
@@ -411,17 +389,18 @@
             </div>
             <div class="chal-timer">Starts in: <span>3 Days</span></div>
           </div>
-          <div class="chal-body" style="grid-template-columns: 1fr; gap: 1rem;">
+          <div class="chal-body" style="grid-template-columns:1fr;gap:1rem;">
             <div class="chal-info">
               <h2 class="chal-title">Grand Slam ROI Clash</h2>
               <p class="chal-desc">The two-week marathon begins soon. Build the highest ROI across the entire tournament to secure the ultimate Tennis badge.</p>
-              <div class="chal-actions" style="max-width:200px; margin-top:1.5rem;">
-                <button class="btn-join" style="background:var(--white-10); color:var(--white); border:1px solid var(--white-20);">Notify Me</button>
+              <div class="chal-actions" style="max-width:200px;margin-top:1.5rem;">
+                <button class="btn-join" style="background:var(--white-10);color:var(--white);border:1px solid var(--white-20);">Notify Me</button>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- March Acca Madness (Past) -->
         <div class="chal-card" data-status="past" style="display:none;">
           <div class="chal-header">
             <div class="chal-tags">
@@ -438,50 +417,90 @@
             <div class="chal-lb-widget">
               <div class="widget-header">Final Results</div>
               <div class="mini-lb">
-                <div class="mini-lb-row">
-                  <span class="m-rank top">1</span>
-                  <span class="m-user">@PuntKing</span>
-                  <span class="m-score">@42.50</span>
-                </div>
-                <div class="mini-lb-row">
-                  <span class="m-rank top">2</span>
-                  <span class="m-user">@ValueOnly</span>
-                  <span class="m-score">@28.10</span>
-                </div>
+                <div class="mini-lb-row"><span class="m-rank top">1</span><span class="m-user">@PuntKing</span><span class="m-score">@42.50</span></div>
+                <div class="mini-lb-row"><span class="m-rank top">2</span><span class="m-user">@ValueOnly</span><span class="m-score">@28.10</span></div>
               </div>
             </div>
           </div>
         </div>
 
       </div>
-
     </div>
   </div>
 
   <script>
-    function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    // ── Auth helpers (matches dashboard.html pattern) ──
+    function getUser() {
+      try { return JSON.parse(localStorage.getItem('ps_user')); }
+      catch { return null; }
+    }
+
+    function logout(e) {
+      e.preventDefault();
+      localStorage.removeItem('ps_user');
+      window.location.href = 'auth.html';
+    }
+
+    // ── Auth guard + init ──
+    window.addEventListener('load', () => {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      // Set avatar initials
+      if (user.username) {
+        document.getElementById('topbarAvatar').textContent = user.username.slice(0, 2).toUpperCase();
+        // Replace "@You" with actual username in the challenge widget
+        const youEl = document.getElementById('epl-you-name');
+        if (youEl) youEl.textContent = '@' + user.username;
+      }
+
+      // Start countdown timers
+      startCountdowns();
+    });
+
+    // ── Sidebar ──
+    function openSidebar()  { document.getElementById('sidebar').classList.add('open');    document.getElementById('overlay').classList.add('open');    }
     function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
+    // ── Filter ──
     function filterChallenges(btn) {
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
 
       const filter = btn.dataset.filter;
-      const cards = document.querySelectorAll('.chal-card');
-
-      cards.forEach(card => {
+      document.querySelectorAll('.chal-card').forEach(card => {
         card.style.display = card.dataset.status === filter ? 'block' : 'none';
       });
     }
 
-    window.addEventListener('load', () => {
-      try {
-        const user = JSON.parse(localStorage.getItem('ps_user'));
-        if (user && user.username) {
-          document.getElementById('topbarAvatar').textContent = user.username.slice(0,2).toUpperCase();
-        }
-      } catch(e) {}
-    });
+    // ── Live Countdowns ──
+    function formatCountdown(ms) {
+      if (ms <= 0) return 'Ended';
+      const totalSec = Math.floor(ms / 1000);
+      const d = Math.floor(totalSec / 86400);
+      const h = Math.floor((totalSec % 86400) / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      if (d > 0) return `${d}d ${h}h ${m}m`;
+      if (h > 0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    function startCountdowns() {
+      const els = document.querySelectorAll('.countdown[data-ends]');
+      if (!els.length) return;
+
+      function tick() {
+        const now = Date.now();
+        els.forEach(el => {
+          const end = new Date(el.dataset.ends).getTime();
+          el.textContent = formatCountdown(end - now);
+        });
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    }
   </script>
 </body>
 </html>
