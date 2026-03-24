@@ -364,6 +364,11 @@
       animation: spin 0.7s linear infinite;
     }
 
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .divider {
       display: flex;
       align-items: center;
@@ -484,6 +489,23 @@
       letter-spacing: 0.04em;
     }
 
+    .debug-info {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      color: #0f0;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 300px;
+      max-height: 200px;
+      overflow: auto;
+      z-index: 9999;
+      display: none;
+    }
+
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -512,6 +534,9 @@
 <body>
 
   <div class="bg-glow"></div>
+
+  <!-- Debug panel - remove in production -->
+  <div class="debug-info" id="debugPanel"></div>
 
   <nav>
     <a href="index.html" class="nav-logo">
@@ -600,7 +625,7 @@
             </label>
           </div>
 
-          <button class="btn-submit" id="signupBtn" onclick="handleSignup()">Create My Account</button>
+          <button class="btn-submit" id="signupBtn" onclick="handleSignup(event)">Create My Account</button>
           <p class="field-error" id="signupGeneralError" style="text-align:center; margin-top:0.6rem;"></p>
 
           <div class="switch-row">
@@ -636,7 +661,7 @@
           </div>
           <div id="forgotMessage" style="font-size:0.75rem;color:#4ade80;text-align:right;margin-top:-0.5rem;margin-bottom:0.5rem;display:none;"></div>
 
-          <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Log In to PunterStat.</button>
+          <button class="btn-submit" id="loginBtn" onclick="handleLogin(event)">Log In to PunterStat.</button>
           <p class="field-error" id="loginGeneralError" style="text-align:center; margin-top:0.6rem;"></p>
 
           <div class="switch-row">
@@ -652,11 +677,27 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script>
+    // Debug helper
+    function log(msg) {
+      console.log(msg);
+      const debug = document.getElementById('debugPanel');
+      if (debug) {
+        debug.style.display = 'block';
+        debug.innerHTML += msg + '<br>';
+      }
+    }
+
     const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
     
     // Initialize Supabase client
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase;
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      log('Supabase initialized');
+    } catch (e) {
+      log('Supabase init error: ' + e.message);
+    }
 
     // Check if already logged in
     const existingUser = localStorage.getItem('ps_user');
@@ -664,17 +705,14 @@
       window.location.href = 'dashboard.html';
     }
 
-    // Check for confirmation redirect (email link clicked)
+    // Check for confirmation redirect
     window.addEventListener('DOMContentLoaded', () => {
       const hash = window.location.hash;
       if (hash && hash.includes('access_token')) {
-        // They clicked email link but landed here instead of confirm.html
-        // Redirect to proper confirmation page
         window.location.href = 'confirm.html' + hash;
         return;
       }
 
-      // Check for error params
       const params = new URLSearchParams(window.location.search);
       if (params.get('error')) {
         showError('Link expired or invalid. Please try logging in.');
@@ -750,7 +788,7 @@
       }
     }
 
-    // REST API helper for non-auth operations
+    // REST API helper
     async function supaFetch(path, options = {}) {
       const res = await fetch(`${SUPABASE_URL}${path}`, {
         headers: {
@@ -765,12 +803,17 @@
       return { data, ok: res.ok, status: res.status };
     }
 
-    async function handleSignup() {
+    async function handleSignup(e) {
+      if (e) e.preventDefault();
+      log('Signup clicked');
+
       const username = document.getElementById('signupUsername').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
       const terms = document.getElementById('termsCheck').checked;
       const generalErr = document.getElementById('signupGeneralError');
+
+      log('Values: ' + username + ', ' + email + ', pass:' + password.length);
 
       let valid = true;
 
@@ -778,34 +821,44 @@
         document.getElementById('signupUsername').classList.add('error');
         document.getElementById('usernameError').classList.add('show');
         valid = false;
+        log('Username invalid');
       }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         document.getElementById('signupEmail').classList.add('error');
         document.getElementById('signupEmailError').classList.add('show');
         valid = false;
+        log('Email invalid');
       }
 
       if (password.length < 8) {
         document.getElementById('signupPassword').classList.add('error');
         document.getElementById('signupPasswordError').classList.add('show');
         valid = false;
+        log('Password too short');
       }
 
       if (!terms) {
         generalErr.textContent = 'Please agree to the terms to continue.';
         generalErr.classList.add('show');
         valid = false;
+        log('Terms not checked');
       }
 
-      if (!valid) return;
+      if (!valid) {
+        log('Validation failed');
+        return;
+      }
 
       const btn = document.getElementById('signupBtn');
       btn.classList.add('loading');
+      btn.disabled = true;
       generalErr.classList.remove('show');
+      log('Starting signup...');
 
       try {
-        // Check username availability first
+        // Check username availability
+        log('Checking username...');
         const { data: existingUser } = await supaFetch(
           `/rest/v1/users?username=eq.${encodeURIComponent(username)}&select=username`
         );
@@ -813,8 +866,10 @@
         if (existingUser && existingUser.length > 0) {
           throw new Error('Username already taken. Try another.');
         }
+        log('Username available');
 
-        // Use Supabase JS client for signup with proper email redirect
+        // Sign up with Supabase
+        log('Calling supabase.auth.signUp...');
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email,
           password,
@@ -824,16 +879,24 @@
           }
         });
 
-        if (authError) throw authError;
+        log('Signup response: ' + JSON.stringify(authData));
+        if (authError) {
+          log('Auth error: ' + authError.message);
+          throw authError;
+        }
 
-        // Check if user already exists (signUp returns user with no identities if email exists)
-        if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+        if (!authData.user) {
+          throw new Error('No user returned from signup');
+        }
+
+        // Check if email already exists (user exists but no new identity)
+        if (authData.user.identities && authData.user.identities.length === 0) {
           throw new Error('This email is already registered. Try logging in.');
         }
 
-        // Save pending for display
+        // Save pending
         localStorage.setItem('ps_pending', JSON.stringify({ username, email }));
-        btn.classList.remove('loading');
+        log('Success! Showing confirmation screen');
 
         // Show confirmation screen
         document.getElementById('formArea').style.display = 'none';
@@ -841,12 +904,14 @@
         document.getElementById('confirmEmail').textContent = email;
 
       } catch (err) {
+        log('Error: ' + err.message);
         btn.classList.remove('loading');
+        btn.disabled = false;
 
-        // Handle specific errors
         if (err.message.includes('already registered') || 
             err.message.includes('already taken') ||
-            err.message.includes('already exists')) {
+            err.message.includes('already exists') ||
+            err.message.includes('User already registered')) {
           generalErr.textContent = err.message;
           setTimeout(() => switchTab('login'), 3000);
         } else {
@@ -856,7 +921,10 @@
       }
     }
 
-    async function handleLogin() {
+    async function handleLogin(e) {
+      if (e) e.preventDefault();
+      log('Login clicked');
+
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       const generalErr = document.getElementById('loginGeneralError');
@@ -879,31 +947,31 @@
 
       const btn = document.getElementById('loginBtn');
       btn.classList.add('loading');
+      btn.disabled = true;
       generalErr.classList.remove('show');
 
       try {
-        // Use Supabase JS client for login
+        log('Calling signInWithPassword...');
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
         });
 
         if (error) throw error;
+        log('Login successful');
 
-        // Check for profile
-        const { data: profiles, error: profileError } = await supabase
+        // Get or create profile
+        let { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', data.user.id)
           .single();
 
-        let profile = profiles;
-
-        // Auto-create profile if missing (recovery for orphaned users)
         if (!profile || profileError) {
+          log('Creating missing profile...');
           const username = data.user.user_metadata?.username || data.user.email.split('@')[0];
           
-          const { data: newProfile, error: createError } = await supabase
+          const { data: newProfile } = await supabase
             .from('users')
             .insert({
               id: data.user.id,
@@ -917,15 +985,9 @@
             .select()
             .single();
 
-          if (createError) {
-            console.warn('Profile creation failed:', createError);
-            profile = { username, grade: 'ungraded', punter_score: 0 };
-          } else {
-            profile = newProfile;
-          }
+          profile = newProfile || { username, grade: 'ungraded', punter_score: 0 };
         }
 
-        // Save to localStorage
         localStorage.setItem('ps_user', JSON.stringify({
           id: data.user.id,
           username: profile.username,
@@ -936,11 +998,12 @@
           punter_score: profile.punter_score || 0
         }));
 
-        btn.classList.remove('loading');
         window.location.href = 'dashboard.html';
 
       } catch (err) {
+        log('Login error: ' + err.message);
         btn.classList.remove('loading');
+        btn.disabled = false;
         generalErr.textContent = err.message || 'Login failed. Please check your credentials.';
         generalErr.classList.add('show');
       }
