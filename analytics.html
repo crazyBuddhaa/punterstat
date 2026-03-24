@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PunterStat. — Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --blue: #2B1FE8;
+      --blue-bright: #3D2FFF;
+      --navy: #0B1340;
+      --navy-card: #0D1B3E;
+      --navy-card2: #111D45;
+      --gold: #FFD166;
+      --platinum: #E8E8F0;
+      --diamond: #7DF9FF;
+      --silver: #C0C0C0;
+      --bronze: #CD7F32;
+      --white: #FFFFFF;
+      --white-60: rgba(255,255,255,0.6);
+      --white-30: rgba(255,255,255,0.3);
+      --white-20: rgba(255,255,255,0.12);
+      --white-10: rgba(255,255,255,0.07);
+      --success: #4ade80;
+      --error: #f87171;
+      --sidebar-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--navy-card); border-right: 1px solid var(--white-20); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s ease; overflow-y: auto; }
+    .sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 1.4rem 1.4rem 1.2rem; text-decoration: none; border-bottom: 1px solid var(--white-20); flex-shrink: 0; }
+    .sidebar-logo img { width: 30px; height: 30px; object-fit: contain; }
+    .sidebar-logo span { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--white); letter-spacing: -0.4px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0.8rem; display: flex; flex-direction: column; gap: 0.1rem; }
+    .nav-group-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-30); padding: 0.8rem 0.9rem 0.4rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 0.8rem; border: none; background: transparent; color: var(--white-60); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 0.85rem; width: 100%; transition: background 0.2s, color 0.2s; text-decoration: none; }
+    .nav-item:hover { background: var(--white-10); color: var(--white); }
+    .nav-item.active { background: var(--blue-bright); color: var(--white); }
+    .nav-icon { font-size: 0.95rem; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--gold); color: var(--navy); font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.45rem; border-radius: 100px; }
+    .sidebar-logout { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 1.4rem; font-size: 0.82rem; font-weight: 600; color: var(--white-30); text-decoration: none; border-top: 1px solid var(--white-20); transition: color 0.2s; flex-shrink: 0; }
+    .sidebar-logout:hover { color: var(--error); }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* TOPBAR */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.8rem; border-bottom: 1px solid var(--white-20); background: var(--navy-card); position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 0.8rem; }
+    .topbar-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.3px; }
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--white); font-size: 1.3rem; cursor: pointer; padding: 0.3rem; }
+    .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--diamond)); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; }
+
+    /* CONTENT */
+    .content { padding: 1.6rem 1.8rem; flex: 1; }
+
+    /* PANELS */
+    .panel {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.3rem;
+      padding: 1.5rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .panel-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem; }
+    .panel-eyebrow { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.25rem; }
+    .panel-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: -0.3px; }
+
+    /* GRID LAYOUTS */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem; }
+
+    /* KEY STATS */
+    .key-stat {
+      background: var(--navy-card);
+      border: 1px solid var(--white-20);
+      border-radius: 1.1rem;
+      padding: 1.2rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .key-stat-icon { font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .key-stat-val { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; line-height: 1; }
+    .key-stat-val.pos { color: var(--success); }
+    .key-stat-val.neg { color: var(--error); }
+    .key-stat-val.gold { color: var(--gold); }
+    .key-stat-label { font-size: 0.72rem; color: var(--white-60); margin-top: 0.3rem; font-weight: 500; }
+    .key-stat-delta { font-size: 0.7rem; margin-top: 0.3rem; font-weight: 600; color: var(--white-30); }
+
+    /* CHART TABS */
+    .chart-tabs { display: flex; gap: 0.4rem; }
+    .chart-tab { background: var(--white-10); border: 1.5px solid var(--white-20); border-radius: 0.6rem; padding: 0.35rem 0.75rem; font-size: 0.72rem; font-weight: 700; color: var(--white-60); cursor: pointer; transition: all 0.18s; }
+    .chart-tab:hover { color: var(--white); border-color: var(--white-30); }
+    .chart-tab.active { background: var(--blue-bright); border-color: var(--blue-bright); color: var(--white); }
+
+    /* CHART WRAP */
+    .chart-wrap { position: relative; height: 220px; margin-bottom: 0.8rem; }
+
+    .chart-legend { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--white-60); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* SPORT BREAKDOWN */
+    .breakdown-list { display: flex; flex-direction: column; gap: 0.9rem; }
+
+    .breakdown-row { display: flex; align-items: center; gap: 0.8rem; }
+    .breakdown-sport { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 600; min-width: 130px; flex-shrink: 0; }
+    .breakdown-bar-wrap { flex: 1; height: 6px; background: var(--white-10); border-radius: 100px; overflow: hidden; }
+    .breakdown-fill { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
+    .breakdown-stat { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.82rem; min-width: 60px; text-align: right; flex-shrink: 0; }
+    .breakdown-count { font-size: 0.72rem; color: var(--white-30); min-width: 45px; text-align: right; flex-shrink: 0; }
+
+    /* DONUT */
+    .donut-wrap { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+
+    .donut-chart { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+    .donut-chart canvas { width: 140px !important; height: 140px !important; }
+
+    .donut-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .donut-pct { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem; display: block; letter-spacing: -0.5px; }
+    .donut-sub { font-size: 0.65rem; color: var(--white-60); display: block; margin-top: 0.1rem; }
+
+    .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 0.7rem; }
+    .donut-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .donut-row-left { display: flex; align-items: center; gap: 0.5rem; }
+    .dl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .donut-row-label { font-size: 0.8rem; color: var(--white-60); }
+    .donut-row-val { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem; }
+
+    /* BOOKIE BREAKDOWN */
+    .bookie-grid { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+
+    .bookie-stat-card {
+      background: var(--navy-card2);
+      border: 1px solid var(--white-20);
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      min-width: 110px;
+      flex: 1;
+      transition: border-color 0.2s;
+    }
+
+    .bookie-stat-card:hover { border-color: rgba(255,255,255,0.2); }
+    .bookie-name { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.82rem; margin-bottom: 0.5rem; }
+    .bookie-tips { font-size: 0.7rem; color: var(--white-60); }
+    .bookie-roi { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; margin-top: 0.3rem; }
+
+    /* STREAK CARD */
+    .streak-row { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+    .streak-card { flex: 1; min-width: 120px; background: var(--navy-card2); border: 1px solid var(--white-20); border-radius: 1rem; padding: 1rem 1.1rem; text-align: center; }
+    .streak-val { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; }
+    .streak-val.pos { color: var(--success); }
+    .streak-val.neg { color: var(--error); }
+    .streak-val.gold { color: var(--gold); }
+    .streak-label { font-size: 0.72rem; color: var(--white-60); margin-top: 0.3rem; font-weight: 500; }
+
+    /* EMPTY */
+    .empty-panel { text-align: center; padding: 3rem 1rem; color: var(--white-30); }
+    .empty-panel .ei { font-size: 2rem; margin-bottom: 0.6rem; }
+    .empty-panel p { font-size: 0.82rem; line-height: 1.6; }
+
+    /* LOADING */
+    .spinner { width: 28px; height: 28px; border: 3px solid var(--white-20); border-top-color: var(--white-60); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 1rem auto; }
+
+    /* OVERLAY */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,0.4); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .mobile-menu-btn { display: block; }
+      .content { padding: 1rem; }
+      .topbar { padding: 0.9rem 1.1rem; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .donut-wrap { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <img src="assets/logo.png" alt="PunterStat." />
+      <span>PunterStat.</span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Overview</a>
+      <a class="nav-item" href="submit.html"><span class="nav-icon">➕</span> Submit Tip <span class="nav-badge">New</span></a>
+      <a class="nav-item" href="tips.html"><span class="nav-icon">📋</span> My Tips</a>
+      <a class="nav-item active" href="analytics.html"><span class="nav-icon">📈</span> Analytics</a>
+      <div class="nav-group-label">Community</div>
+      <a class="nav-item" href="leaderboard.html"><span class="nav-icon">🏆</span> Leaderboard</a>
+      <a class="nav-item" href="challenges.html"><span class="nav-icon">⚔️</span> Challenges</a>
+      <div class="nav-group-label">Progress</div>
+      <a class="nav-item" href="achievements.html"><span class="nav-icon">🎖️</span> Achievements</a>
+      <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Public Profile</a>
+    </nav>
+    <a href="auth.html" class="sidebar-logout" onclick="logout(event)"><span>⎋</span> Sign Out</a>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+        <span class="topbar-title">Analytics</span>
+      </div>
+      <div class="topbar-avatar" id="topbarAvatar">P</div>
+    </header>
+
+    <div class="content">
+
+      <!-- KEY STATS -->
+      <div class="grid-3" id="keyStats">
+        <div class="key-stat"><div class="spinner"></div></div>
+        <div class="key-stat"><div class="spinner"></div></div>
+        <div class="key-stat"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ROI CHART + WIN/LOSS DONUT -->
+      <div class="grid-2" style="margin-bottom:1.2rem;">
+
+        <!-- ROI Chart -->
+        <div class="panel" style="animation-delay:0.1s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">Performance</div>
+              <div class="panel-title">ROI Over Time</div>
+            </div>
+            <div class="chart-tabs">
+              <button class="chart-tab active" onclick="setRange(this,'7d')">7D</button>
+              <button class="chart-tab" onclick="setRange(this,'1m')">1M</button>
+              <button class="chart-tab" onclick="setRange(this,'3m')">3M</button>
+              <button class="chart-tab" onclick="setRange(this,'all')">All</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="roiChart"></canvas>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span> Your ROI %</div>
+            <div class="legend-item"><span class="legend-dot" style="background:rgba(255,255,255,0.25)"></span> Breakeven (0%)</div>
+          </div>
+        </div>
+
+        <!-- Win/Loss Donut -->
+        <div class="panel" style="animation-delay:0.15s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">Results</div>
+              <div class="panel-title">Win / Loss Split</div>
+            </div>
+          </div>
+          <div class="donut-wrap" id="donutWrap">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SPORT BREAKDOWN + BOOKIE BREAKDOWN -->
+      <div class="grid-2" style="margin-bottom:1.2rem;">
+
+        <!-- Sport Breakdown -->
+        <div class="panel" style="animation-delay:0.2s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">By Sport</div>
+              <div class="panel-title">Sport Breakdown</div>
+            </div>
+          </div>
+          <div class="breakdown-list" id="sportBreakdown">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- Bookmaker Breakdown -->
+        <div class="panel" style="animation-delay:0.25s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">By Bookmaker</div>
+              <div class="panel-title">Bookie Breakdown</div>
+            </div>
+          </div>
+          <div class="bookie-grid" id="bookieBreakdown">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STREAKS + BET TYPE -->
+      <div class="grid-2">
+
+        <!-- Streaks -->
+        <div class="panel" style="animation-delay:0.3s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">Streaks</div>
+              <div class="panel-title">Streak Records</div>
+            </div>
+          </div>
+          <div class="streak-row" id="streakRow">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- Bet Type Breakdown -->
+        <div class="panel" style="animation-delay:0.35s;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-eyebrow">Bet Types</div>
+              <div class="panel-title">Single vs Accumulator</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:180px;">
+            <canvas id="betTypeChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://itcadrokvpbhsjcxloix.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_pKrNiisu4YHyy8Sdz_vveA_pg33swOU';
+
+    const SPORT_EMOJI = { Football:'⚽', Basketball:'🏀', Tennis:'🎾', 'Am. Football':'🏈', Cricket:'🏏', 'Ice Hockey':'🏒', 'Boxing/MMA':'🥊', Mixed:'🎲' };
+    const SPORT_COLORS = { Football:'#FFD166', Basketball:'#4ade80', Tennis:'#7DF9FF', 'Am. Football':'#f87171', Cricket:'#a78bfa', 'Ice Hockey':'#60a5fa', 'Boxing/MMA':'#fb923c', Mixed:'#E8E8F0' };
+
+    let allTips = [];
+    let roiChartInstance = null;
+    let betTypeChartInstance = null;
+    let donutChartInstance = null;
+    let currentRange = '7d';
+
+    function getUser() { try { return JSON.parse(localStorage.getItem('ps_user')); } catch { return null; } }
+    function logout(e) { e.preventDefault(); localStorage.removeItem('ps_user'); window.location.href = 'auth.html'; }
+
+    async function supaFetch(path) {
+      const user = getUser();
+      const token = user?.access_token || SUPABASE_KEY;
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      return res.json();
+    }
+
+    async function loadAnalytics() {
+      const user = getUser();
+      if (!user) { window.location.href = 'auth.html'; return; }
+      document.getElementById('topbarAvatar').textContent = user.username.slice(0,2).toUpperCase();
+
+      try {
+        // Fetch profile + all tips
+        const [profiles, tips] = await Promise.all([
+          supaFetch(`/rest/v1/users?id=eq.${user.id}&select=*`),
+          supaFetch(`/rest/v1/tips?user_id=eq.${user.id}&order=submitted_at.asc&select=*`)
+        ]);
+
+        const profile = Array.isArray(profiles) ? profiles[0] : null;
+        allTips = Array.isArray(tips) ? tips : [];
+
+        renderKeyStats(profile, allTips);
+        renderDonut(allTips);
+        renderSportBreakdown(allTips);
+        renderBookieBreakdown(allTips);
+        renderStreaks(profile, allTips);
+        renderBetTypeChart(allTips);
+        renderRoiChart(currentRange);
+
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    // ── KEY STATS ──
+    function renderKeyStats(profile, tips) {
+      const settled = tips.filter(t => t.status === 'won' || t.status === 'lost');
+      const won = tips.filter(t => t.status === 'won');
+      const totalStaked = settled.reduce((s, t) => s + (t.stake || 0), 0);
+      const totalReturned = won.reduce((s, t) => s + (t.potential_winnings || 0), 0);
+      const roi = totalStaked > 0 ? ((totalReturned - totalStaked) / totalStaked * 100) : 0;
+      const winRate = settled.length > 0 ? (won.length / settled.length * 100) : 0;
+      const avgOdds = tips.length > 0 ? tips.reduce((s, t) => s + (t.odds || 0), 0) / tips.length : 0;
+      const totalProfit = totalReturned - totalStaked;
+
+      document.getElementById('keyStats').innerHTML = `
+        <div class="key-stat" style="animation-delay:0s;">
+          <div class="key-stat-icon">📈</div>
+          <div class="key-stat-val ${roi >= 0 ? 'pos' : 'neg'}">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>
+          <div class="key-stat-label">Overall ROI</div>
+          <div class="key-stat-delta">${settled.length} settled tips</div>
+        </div>
+        <div class="key-stat" style="animation-delay:0.05s;">
+          <div class="key-stat-icon">🎯</div>
+          <div class="key-stat-val gold">${winRate.toFixed(1)}%</div>
+          <div class="key-stat-label">Win Rate</div>
+          <div class="key-stat-delta">${won.length}W / ${settled.length - won.length}L</div>
+        </div>
+        <div class="key-stat" style="animation-delay:0.1s;">
+          <div class="key-stat-icon">💰</div>
+          <div class="key-stat-val ${totalProfit >= 0 ? 'pos' : 'neg'}">₦${Math.abs(totalProfit).toLocaleString()}</div>
+          <div class="key-stat-label">${totalProfit >= 0 ? 'Total Profit' : 'Total Loss'}</div>
+          <div class="key-stat-delta">Avg odds @${avgOdds.toFixed(2)}</div>
+        </div>
+      `;
+    }
+
+    // ── ROI CHART ──
+    function setRange(btn, range) {
+      document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = range;
+      renderRoiChart(range);
+    }
+
+    function renderRoiChart(range) {
+      const now = new Date();
+      let filtered = allTips.filter(t => t.status === 'won' || t.status === 'lost');
+
+      if (range === '7d') filtered = filtered.filter(t => (now - new Date(t.submitted_at)) <= 7 * 86400000);
+      else if (range === '1m') filtered = filtered.filter(t => (now - new Date(t.submitted_at)) <= 30 * 86400000);
+      else if (range === '3m') filtered = filtered.filter(t => (now - new Date(t.submitted_at)) <= 90 * 86400000);
+
+      // Build cumulative ROI over time
+      let cumStake = 0, cumReturn = 0;
+      const labels = [], roiData = [];
+
+      filtered.forEach(t => {
+        cumStake += t.stake || 0;
+        if (t.status === 'won') cumReturn += t.potential_winnings || 0;
+        const roi = cumStake > 0 ? ((cumReturn - cumStake) / cumStake * 100) : 0;
+        labels.push(new Date(t.submitted_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' }));
+        roiData.push(parseFloat(roi.toFixed(2)));
+      });
+
+      if (roiChartInstance) roiChartInstance.destroy();
+
+      const ctx = document.getElementById('roiChart').getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+      gradient.addColorStop(0, 'rgba(255,209,102,0.3)');
+      gradient.addColorStop(1, 'rgba(255,209,102,0)');
+
+      roiChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['No data'],
+          datasets: [
+            {
+              label: 'ROI %',
+              data: roiData.length ? roiData : [0],
+              borderColor: '#FFD166',
+              backgroundColor: gradient,
+              borderWidth: 2.5,
+              pointRadius: roiData.length > 20 ? 0 : 3,
+              pointBackgroundColor: '#FFD166',
+              tension: 0.35,
+              fill: true,
+            },
+            {
+              label: 'Breakeven',
+              data: Array(Math.max(labels.length, 1)).fill(0),
+              borderColor: 'rgba(255,255,255,0.15)',
+              borderWidth: 1,
+              borderDash: [4, 4],
+              pointRadius: 0,
+              fill: false,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: {
+            backgroundColor: '#0D1B3E',
+            borderColor: 'rgba(255,255,255,0.12)',
+            borderWidth: 1,
+            titleColor: 'rgba(255,255,255,0.6)',
+            bodyColor: '#FFD166',
+            callbacks: { label: ctx => ` ${ctx.raw}%` }
+          }},
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, maxTicksLimit: 8 } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, callback: v => v + '%' } }
+          }
+        }
+      });
+    }
+
+    // ── DONUT ──
+    function renderDonut(tips) {
+      const won = tips.filter(t => t.status === 'won').length;
+      const lost = tips.filter(t => t.status === 'lost').length;
+      const pending = tips.filter(t => t.status === 'pending').length;
+      const total = won + lost + pending;
+      const winRate = total > 0 ? Math.round((won / (won + lost || 1)) * 100) : 0;
+
+      document.getElementById('donutWrap').innerHTML = `
+        <div class="donut-chart">
+          <canvas id="donutCanvas" width="140" height="140"></canvas>
+          <div class="donut-center">
+            <span class="donut-pct">${winRate}%</span>
+            <span class="donut-sub">Win Rate</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-row">
+            <div class="donut-row-left"><span class="dl-dot" style="background:var(--success)"></span><span class="donut-row-label">Won</span></div>
+            <span class="donut-row-val" style="color:var(--success)">${won}</span>
+          </div>
+          <div class="donut-row">
+            <div class="donut-row-left"><span class="dl-dot" style="background:var(--error)"></span><span class="donut-row-label">Lost</span></div>
+            <span class="donut-row-val" style="color:var(--error)">${lost}</span>
+          </div>
+          <div class="donut-row">
+            <div class="donut-row-left"><span class="dl-dot" style="background:var(--gold)"></span><span class="donut-row-label">Pending</span></div>
+            <span class="donut-row-val" style="color:var(--gold)">${pending}</span>
+          </div>
+          <div class="donut-row" style="border-top:1px solid var(--white-20); padding-top:0.5rem; margin-top:0.2rem;">
+            <div class="donut-row-left"><span class="donut-row-label" style="color:var(--white-60);">Total Tips</span></div>
+            <span class="donut-row-val">${total}</span>
+          </div>
+        </div>
+      `;
+
+      if (donutChartInstance) donutChartInstance.destroy();
+      const ctx = document.getElementById('donutCanvas').getContext('2d');
+      donutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [won || 0.001, lost || 0.001, pending || 0.001],
+            backgroundColor: ['rgba(74,222,128,0.8)', 'rgba(248,113,113,0.8)', 'rgba(255,209,102,0.6)'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: false,
+          cutout: '72%',
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
+    }
+
+    // ── SPORT BREAKDOWN ──
+    function renderSportBreakdown(tips) {
+      const settled = tips.filter(t => t.status === 'won' || t.status === 'lost');
+      const sports = {};
+
+      settled.forEach(t => {
+        const s = t.sport || 'Other';
+        if (!sports[s]) sports[s] = { won: 0, total: 0, stake: 0, returned: 0 };
+        sports[s].total++;
+        sports[s].stake += t.stake || 0;
+        if (t.status === 'won') { sports[s].won++; sports[s].returned += t.potential_winnings || 0; }
+      });
+
+      const sorted = Object.entries(sports).sort((a, b) => b[1].total - a[1].total);
+      const maxTips = Math.max(...sorted.map(([,v]) => v.total), 1);
+
+      if (sorted.length === 0) {
+        document.getElementById('sportBreakdown').innerHTML = `<div class="empty-panel"><div class="ei">⚽</div><p>No settled tips yet to break down by sport.</p></div>`;
+        return;
+      }
+
+      document.getElementById('sportBreakdown').innerHTML = sorted.map(([sport, data]) => {
+        const roi = data.stake > 0 ? ((data.returned - data.stake) / data.stake * 100) : 0;
+        const barWidth = (data.total / maxTips * 100).toFixed(0);
+        const color = SPORT_COLORS[sport] || '#FFD166';
+        return `
+          <div class="breakdown-row">
+            <div class="breakdown-sport">${SPORT_EMOJI[sport] || '🎯'} ${sport}</div>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-fill" style="width:${barWidth}%; background:${color};"></div>
+            </div>
+            <div class="breakdown-stat" style="color:${roi >= 0 ? 'var(--success)' : 'var(--error)'}">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>
+            <div class="breakdown-count">${data.total} tips</div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── BOOKIE BREAKDOWN ──
+    function renderBookieBreakdown(tips) {
+      const bookies = {};
+      tips.forEach(t => {
+        const bNames = (t.bookmaker || 'Other').split(',').map(b => b.trim());
+        bNames.forEach(b => {
+          if (!bookies[b]) bookies[b] = { total: 0, won: 0, stake: 0, returned: 0 };
+          bookies[b].total++;
+          bookies[b].stake += t.stake || 0;
+          if (t.status === 'won') { bookies[b].won++; bookies[b].returned += t.potential_winnings || 0; }
+        });
+      });
+
+      const sorted = Object.entries(bookies).sort((a, b) => b[1].total - a[1].total).slice(0, 8);
+
+      if (sorted.length === 0) {
+        document.getElementById('bookieBreakdown').innerHTML = `<div class="empty-panel"><div class="ei">📚</div><p>No tips submitted yet.</p></div>`;
+        return;
+      }
+
+      document.getElementById('bookieBreakdown').innerHTML = sorted.map(([bookie, data]) => {
+        const roi = data.stake > 0 ? ((data.returned - data.stake) / data.stake * 100) : 0;
+        return `
+          <div class="bookie-stat-card">
+            <div class="bookie-name">${bookie}</div>
+            <div class="bookie-tips">${data.total} tips · ${data.won}W</div>
+            <div class="bookie-roi" style="color:${roi >= 0 ? 'var(--success)' : 'var(--error)'}">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── STREAKS ──
+    function renderStreaks(profile, tips) {
+      const settled = tips.filter(t => t.status === 'won' || t.status === 'lost').sort((a,b) => new Date(a.submitted_at) - new Date(b.submitted_at));
+
+      let currentStreak = 0, bestWin = 0, bestLoss = 0, tempWin = 0, tempLoss = 0;
+
+      settled.forEach(t => {
+        if (t.status === 'won') {
+          tempWin++; tempLoss = 0;
+          bestWin = Math.max(bestWin, tempWin);
+        } else {
+          tempLoss++; tempWin = 0;
+          bestLoss = Math.max(bestLoss, tempLoss);
+        }
+      });
+
+      // Current streak
+      for (let i = settled.length - 1; i >= 0; i--) {
+        const s = settled[i].status;
+        if (i === settled.length - 1) { currentStreak = s === 'won' ? 1 : -1; }
+        else if ((currentStreak > 0 && s === 'won') || (currentStreak < 0 && s === 'lost')) {
+          currentStreak += currentStreak > 0 ? 1 : -1;
+        } else break;
+      }
+
+      document.getElementById('streakRow').innerHTML = `
+        <div class="streak-card">
+          <div class="streak-val ${currentStreak > 0 ? 'pos' : currentStreak < 0 ? 'neg' : ''}">${currentStreak > 0 ? 'W' + currentStreak : currentStreak < 0 ? 'L' + Math.abs(currentStreak) : '—'}</div>
+          <div class="streak-label">Current Streak</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-val pos">W${bestWin || 0}</div>
+          <div class="streak-label">Best Win Streak</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-val neg">L${bestLoss || 0}</div>
+          <div class="streak-label">Worst Lose Streak</div>
+        </div>
+        <div class="streak-card">
+          <div class="streak-val gold">${settled.length}</div>
+          <div class="streak-label">Settled Tips</div>
+        </div>
+      `;
+    }
+
+    // ── BET TYPE CHART ──
+    function renderBetTypeChart(tips) {
+      const singles = tips.filter(t => t.bet_type === 'single').length;
+      const accas = tips.filter(t => t.bet_type !== 'single').length;
+
+      if (betTypeChartInstance) betTypeChartInstance.destroy();
+      const ctx = document.getElementById('betTypeChart').getContext('2d');
+      betTypeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Single', 'Double', 'Treble', '4-Fold', '5-Fold', '6-Fold+'].filter(type => {
+            const map = { Single:'single', Double:'double', Treble:'treble', '4-Fold':'4fold', '5-Fold':'5fold', '6-Fold+':'acca' };
+            return tips.filter(t => t.bet_type === map[type]).length > 0;
+          }),
+          datasets: [{
+            label: 'Tips',
+            data: ['single','double','treble','4fold','5fold','acca'].map(type =>
+              tips.filter(t => t.bet_type === type).length
+            ).filter(v => v > 0),
+            backgroundColor: ['#FFD166','#4ade80','#7DF9FF','#a78bfa','#fb923c','#60a5fa'],
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: {
+            backgroundColor: '#0D1B3E',
+            borderColor: 'rgba(255,255,255,0.12)',
+            borderWidth: 1,
+            titleColor: 'rgba(255,255,255,0.6)',
+            bodyColor: '#ffffff',
+          }},
+          scales: {
+            x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 10 }, stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+    window.addEventListener('load', loadAnalytics);
+  </script>
+</body>
+</html>
